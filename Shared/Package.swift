@@ -230,13 +230,17 @@ private enum DomainLayer: String {
     static let modulePath: String = "/Domain"
 
     case repositories = "Repositories"
+    case models = "Models"
+    case scoring = "Scoring"
 }
 
 extension DomainLayer: Modular {
     /// Products define the executables and libraries a package produces, making them visible to other packages.
     var product: Product {
         switch self {
-        case .repositories: .library(name: name, targets: [name])
+        case .repositories,
+            .models,
+            .scoring: .library(name: name, targets: [name])
         }
     }
 
@@ -246,7 +250,7 @@ extension DomainLayer: Modular {
     /// A `DomainLayer` target should only depend on targets from Data
     var target: Target {
         switch self {
-        case .repositories: .target(
+        case .repositories, .models: .target(
             name: name,
             dependencies: [
                 External.swiftConcurrencyExtras,
@@ -256,8 +260,17 @@ extension DomainLayer: Modular {
                 Shared.sharedDependency.dependency,
                 Shared.sharedNetworking.dependency,
                 Shared.sharedBundle.dependency,
+            ],
+            path: sourcePath
+        )
 
-                DataLayer.api.dependency
+        case .scoring: .target(
+            name: name,
+            dependencies: [
+                Shared.sharedDependency.dependency,
+                Shared.sharedBundle.dependency,
+
+                DomainLayer.models.dependency
             ],
             path: sourcePath
         )
@@ -266,7 +279,7 @@ extension DomainLayer: Modular {
 
     var testTarget: Target {
         switch self {
-        case .repositories: .testTarget(
+        case .repositories, .models, .scoring: .testTarget(
             name: testName,
             dependencies: [
                 External.swiftConcurrencyExtras,
