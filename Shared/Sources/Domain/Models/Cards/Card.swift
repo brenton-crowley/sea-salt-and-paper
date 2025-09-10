@@ -6,6 +6,16 @@ public struct Card: Hashable, Sendable {
     public let id: Int
     public let kind: Card.Kind
     public let color: Card.Color
+
+    public init(
+        id: Int, 
+        kind: Card.Kind,
+        color: Card.Color
+    ) {
+        self.id = id
+        self.kind = kind
+        self.color = color
+    }
 }
 
 // MARK: - Computed Properties
