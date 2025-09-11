@@ -65,6 +65,24 @@ extension ScoreCalculator.CountScore {
     // Group colours and count the number in group.
     // For each mermaid, score 1x per card in group
     //
+    static let mermaids: Self = .init { cards in
+        let colorCounts = Dictionary(grouping: cards.map(\.color), by: { $0 })
+            .filter({ $0.key != .white }) // Exclude mermaid colors
+            .mapValues { $0.count }
+            .sorted { lhs, rhs in lhs.value > rhs.value }
+
+        // get the count of mermaids
+        let mermaidCount = cards.filter { $0.kind == .mermaid }.count
+
+        guard mermaidCount > 0 else { return 0 }
+
+        let colorScore = (0..<mermaidCount).indices.reduce(0) { score, mermaidIndex in
+            guard colorCounts.indices.contains(mermaidIndex) else { return score }
+            return score + colorCounts[mermaidIndex].value
+        }
+
+        return colorScore
+    }
 }
 
 // MARK: - fileprivate Extensions

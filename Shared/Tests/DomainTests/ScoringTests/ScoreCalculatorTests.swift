@@ -155,6 +155,48 @@ struct ScoringTests {
         // THEN
         #expect(score == input.expectedScore, "Cards: \(input.cards.map(\.kind))")
     }
+
+    @Test(
+        "Scores for mermaid cards",
+        arguments: [
+            // Single Mermaid
+            (cards: [Card.mermaid()], expectedScore: 0),
+            (cards: [.mermaid(), .color(color: .black)], expectedScore: 1),
+            (cards: [.mermaid(), .color(kind: .duo(.fish), color: .black), .color(kind: .duo(.crab), color: .black)],
+             expectedScore: 2),
+            (cards: [.mermaid(), .color(kind: .duo(.fish), color: .black), .color(kind: .duo(.crab), color: .black), .color(kind: .duo(.ship), color: .black)],
+             expectedScore: 3),
+
+            // Two Mermaids
+            (cards: [
+                Card.mermaid(), .mermaid(),
+                .color(kind: .collector(.octopus), color: .black), .color(kind: .duo(.crab), color: .black), .color(kind: .duo(.fish), color: .black), .color(kind: .duo(.ship), color: .black), // 4 black
+                .color(kind: .collector(.sailor), color: .yellow), .color(kind: .multiplier(.penguin), color: .yellow), .color(kind: .collector(.shell), color: .yellow), // 3 yellow
+            ],
+             expectedScore: 7
+            ),
+
+            // Three Mermaids
+            (cards: [
+                Card.mermaid(), .mermaid(), .mermaid(),
+                .color(kind: .collector(.octopus), color: .black), // 1 Black
+                .color(kind: .duo(.crab), color: .darkBlue), .color(kind: .duo(.fish), color: .darkBlue), .color(kind: .duo(.ship), color: .darkBlue), // 3 dark blue
+                .color(kind: .collector(.sailor), color: .yellow), .color(kind: .multiplier(.penguin), color: .yellow), // 2 yellow
+            ],
+             expectedScore: 6
+            ),
+        ]
+    )
+    func scoresForMermaidCards(input: (cards: [Card], expectedScore: Int)) {
+        // GIVEN
+        let testSubject = ScoreCalculator()
+
+        // WHEN
+        let score = testSubject.score(playerRound: input.cards)
+
+        // THEN
+        #expect(score == input.expectedScore, "Cards: \(input.cards.map(\.kind))")
+    }
 }
 
 extension Array where Element == Card {
@@ -197,6 +239,26 @@ extension Card {
         .init(
             id: id,
             kind: .multiplier(multiplier),
+            color: color
+        )
+    }
+
+    fileprivate static func mermaid(id: Int = 1) -> Self {
+        .init(
+            id: id,
+            kind: .mermaid,
+            color: .white
+        )
+    }
+
+    fileprivate static func color(
+        id: Int = 1,
+        kind: Card.Kind = .duo(.crab),
+        color: Card.Color
+    ) -> Self {
+        .init(
+            id: id,
+            kind: kind,
             color: color
         )
     }
