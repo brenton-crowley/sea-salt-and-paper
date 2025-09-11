@@ -22,6 +22,13 @@ struct ScoringTests {
             (cards: [Card.duo(.fish), .duo(.crab)], expectedScore: 0),
             (cards: [Card.duo(.crab), .duo(.crab)], expectedScore: 1),
             (cards: [Card.duo(.ship), .duo(.ship)], expectedScore: 1),
+            (cards: [Card.duo(.swimmer), .duo(.shark)], expectedScore: 1),
+            (cards: [Card.duo(.swimmer), .duo(.swimmer)], expectedScore: 0),
+            (cards: [Card.duo(.shark), .duo(.shark)], expectedScore: 0),
+            (cards: [Card.duo(.shark), .duo(.ship)], expectedScore: 0),
+            (cards: [Card.duo(.swimmer), .duo(.ship)], expectedScore: 0),
+            (cards: [Card.duo(.ship), .duo(.crab)], expectedScore: 0),
+            (cards: [Card.duo(.ship), .duo(.fish)], expectedScore: 0),
         ]
     )
     func scoresForTwoCards(input: (cards: [Card], expectedScore: Int)) {
