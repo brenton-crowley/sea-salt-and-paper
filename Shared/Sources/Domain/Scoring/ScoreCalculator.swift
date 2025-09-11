@@ -12,7 +12,8 @@ public struct ScoreCalculator: Sendable {
 
         return [
             CountScore.duos.scoreForCards(cards),
-            CountScore.collections.scoreForCards(cards)
+            CountScore.collections.scoreForCards(cards),
+            CountScore.multipliers.scoreForCards(cards)
         ].reduce(0, +)
     }
 }

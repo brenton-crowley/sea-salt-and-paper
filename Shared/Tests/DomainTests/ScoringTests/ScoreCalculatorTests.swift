@@ -76,13 +76,76 @@ struct ScoringTests {
             (cards: [.collector(.sailor)], expectedScore: 0),
 
             // Two Cards
-            (cards: [.collector(.octopus)], expectedScore: 0),
-            (cards: [.collector(.shell)], expectedScore: 0),
-            (cards: [.collector(.penguin)], expectedScore: 1),
-            (cards: [.collector(.sailor)], expectedScore: 0),
+            (cards: [.collector(.octopus), .collector(.octopus)], expectedScore: 3),
+            (cards: [.collector(.shell), .collector(.shell)], expectedScore: 2),
+            (cards: [.collector(.penguin), .collector(.penguin)], expectedScore: 3),
+            (cards: [.collector(.sailor), .collector(.sailor)], expectedScore: 5),
+
+            // Three Cards
+            (cards: [.collector(.octopus), .collector(.octopus), .collector(.octopus)], expectedScore: 6),
+            (cards: [.collector(.shell), .collector(.shell), .collector(.shell)], expectedScore: 4),
+            (cards: [.collector(.penguin), .collector(.penguin), .collector(.penguin)], expectedScore: 5),
+
+            // Four Cards
+            (cards: [.collector(.octopus), .collector(.octopus), .collector(.octopus), .collector(.octopus)],
+            expectedScore: 9),
+            (cards: [.collector(.shell), .collector(.shell), .collector(.shell), .collector(.shell)],
+             expectedScore: 6),
+
+            // Five Cards
+            (cards: [.collector(.octopus), .collector(.octopus), .collector(.octopus), .collector(.octopus), .collector(.octopus)],
+            expectedScore: 12),
+            (cards: [.collector(.shell), .collector(.shell), .collector(.shell), .collector(.shell), .collector(.shell)],
+             expectedScore: 8),
+
+            // Combinations
+            (cards: [.collector(.octopus), .collector(.octopus), .collector(.shell)], expectedScore: 3),
+            (cards: [.collector(.shell), .collector(.shell), .collector(.octopus)], expectedScore: 2),
+            (cards: [.collector(.penguin), .collector(.penguin), .collector(.sailor)], expectedScore: 3),
+            (cards: [.collector(.sailor), .collector(.sailor), .collector(.penguin)], expectedScore: 6),
+            (cards: [
+                .collector(.sailor), .collector(.sailor), // 5
+                .collector(.penguin), .collector(.penguin), .collector(.penguin), // 5
+                .collector(.octopus), .collector(.octopus), .collector(.octopus), .collector(.octopus), .collector(.octopus), // 12
+                .collector(.shell), .collector(.shell), .collector(.shell), .collector(.shell), .collector(.shell) // 8
+            ],
+             expectedScore: 30),
         ]
     )
     func scoresForCollectionCards(input: (cards: [Card], expectedScore: Int)) {
+        // GIVEN
+        let testSubject = ScoreCalculator()
+
+        // WHEN
+        let score = testSubject.score(playerRound: input.cards)
+
+        // THEN
+        #expect(score == input.expectedScore, "Cards: \(input.cards.map(\.kind))")
+    }
+
+    @Test(
+        "Scores for multiplier cards",
+        arguments: [
+            // Zero multipliers
+            (cards: [Card.multiplier(.fish)], expectedScore: 0),
+            (cards: [.multiplier(.penguin)], expectedScore: 0),
+            (cards: [.multiplier(.ship)], expectedScore: 0),
+            (cards: [.multiplier(.sailor)], expectedScore: 0),
+
+            // Single multipliers
+            (cards: [Card.multiplier(.fish), .duo(.fish)], expectedScore: 1),
+            (cards: [.multiplier(.ship), .duo(.ship)], expectedScore: 1),
+            (cards: [.multiplier(.penguin), .collector(.penguin)], expectedScore: 3), // One for penguin card as well
+            (cards: [.multiplier(.sailor), .collector(.sailor)], expectedScore: 3),
+
+            // Two card multipliers
+            (cards: [Card.multiplier(.fish), .duo(.fish), .duo(.fish)], expectedScore: 3), // Point for fish pair as well
+            (cards: [.multiplier(.ship), .duo(.ship), .duo(.ship)], expectedScore: 3), // Point ship fish pair as well
+            (cards: [.multiplier(.penguin), .collector(.penguin), .collector(.penguin)], expectedScore: 7), // One for penguin card as well
+            (cards: [.multiplier(.sailor), .collector(.sailor), .collector(.sailor)], expectedScore: 11),
+        ]
+    )
+    func scoresForMultiplierCards(input: (cards: [Card], expectedScore: Int)) {
         // GIVEN
         let testSubject = ScoreCalculator()
 
@@ -122,6 +185,18 @@ extension Card {
         .init(
             id: id,
             kind: .collector(collector),
+            color: color
+        )
+    }
+
+    fileprivate static func multiplier(
+        _ multiplier: Card.Multiplier,
+        id: Int = 1,
+        color: Card.Color = .black
+    ) -> Self {
+        .init(
+            id: id,
+            kind: .multiplier(multiplier),
             color: color
         )
     }

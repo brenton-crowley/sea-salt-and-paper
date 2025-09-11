@@ -51,6 +51,15 @@ extension ScoreCalculator.CountScore {
     // fish x1
     // penguin x2
     // sailor x3
+    static let multipliers: Self = .init { cards in
+        let multipliersInCards = cards.filterMultipliers
+
+        let score = multipliersInCards.reduce(0) { score, multiplier in
+            score + multiplier.score(for: cards)
+        }
+
+        return score
+    }
 
     // Score Mermaids
     // Group colours and count the number in group.
@@ -88,6 +97,31 @@ extension Card.Collector {
     }
 }
 
+extension Card.Multiplier {
+    fileprivate var multiplierValue: Int {
+        switch self {
+        case .ship: 1
+        case .fish: 1
+        case .penguin: 2
+        case .sailor: 3
+        }
+    }
+
+    fileprivate var matchingCardKind: Card.Kind {
+        switch self {
+        case .ship: .duo(.ship)
+        case .fish: .duo(.fish)
+        case .penguin: .collector(.penguin)
+        case .sailor: .collector(.sailor)
+        }
+    }
+
+    fileprivate func score(for cards: [Card]) -> Int {
+        let filteredCards = cards.filter { $0.kind == matchingCardKind }.count * multiplierValue
+        return filteredCards
+    }
+}
+
 extension Array where Element == Card {
     fileprivate var filterDuos: [ScoreCalculator.DuoScore] {
         self.compactMap { card -> ScoreCalculator.DuoScore? in
@@ -101,6 +135,15 @@ extension Array where Element == Card {
     fileprivate var filterCollections: [Card.Collector] {
         self.compactMap { card -> Card.Collector? in
             if case let .collector(kind) = card.kind {
+                return kind
+            }
+            return nil
+        }
+    }
+
+    fileprivate var filterMultipliers: [Card.Multiplier] {
+        self.compactMap { card -> Card.Multiplier? in
+            if case let .multiplier(kind) = card.kind {
                 return kind
             }
             return nil
