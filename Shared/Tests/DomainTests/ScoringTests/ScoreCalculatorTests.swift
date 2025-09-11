@@ -55,7 +55,34 @@ struct ScoringTests {
             ),
         ]
     )
-    func scoresForTwoDuoCards(input: (cards: [Card], expectedScore: Int)) {
+    func scoresForDuoCards(input: (cards: [Card], expectedScore: Int)) {
+        // GIVEN
+        let testSubject = ScoreCalculator()
+
+        // WHEN
+        let score = testSubject.score(playerRound: input.cards)
+
+        // THEN
+        #expect(score == input.expectedScore, "Cards: \(input.cards.map(\.kind))")
+    }
+
+    @Test(
+        "Scores for collection cards",
+        arguments: [
+            // Single Card
+            (cards: [Card.collector(.octopus)], expectedScore: 0),
+            (cards: [.collector(.shell)], expectedScore: 0),
+            (cards: [.collector(.penguin)], expectedScore: 1),
+            (cards: [.collector(.sailor)], expectedScore: 0),
+
+            // Two Cards
+            (cards: [.collector(.octopus)], expectedScore: 0),
+            (cards: [.collector(.shell)], expectedScore: 0),
+            (cards: [.collector(.penguin)], expectedScore: 1),
+            (cards: [.collector(.sailor)], expectedScore: 0),
+        ]
+    )
+    func scoresForCollectionCards(input: (cards: [Card], expectedScore: Int)) {
         // GIVEN
         let testSubject = ScoreCalculator()
 
