@@ -31,11 +31,6 @@ extension ScoreCalculator {
             guard case .standard = self else { return false }
             return true
         }
-
-        var filterSwimmerShark: Bool {
-            guard case .swimmerOrShark = self else { return false }
-            return true
-        }
     }
 
     private func countDuos(round cards: [Card]) -> Int {
