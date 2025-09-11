@@ -197,69 +197,25 @@ struct ScoringTests {
         // THEN
         #expect(score == input.expectedScore, "Cards: \(input.cards.map(\.kind))")
     }
-}
 
-extension Array where Element == Card {
-    fileprivate static let oneCrabPair: Self = [
-        .duo(.crab, id: 1),
-        .duo(.crab, id: 2)
-    ]
-}
+    @Test(
+        "Scores for hand combinations",
+        arguments: [
+            (cards: [Card.duo(.fish), .duo(.fish), .multiplier(.fish)], expectedScore: 3), // 0 + 1 + 2
+            (cards: [.collector(.penguin), .duo(.fish), .multiplier(.penguin)], expectedScore: 3), // 1 + 0 + 2
+            (cards: [.collector(.sailor), .collector(.sailor), .duo(.crab), .duo(.crab), .multiplier(.sailor)], expectedScore: 12), // 0 + 5 + 0 + 1 + 6
+            (cards: [.collector(.sailor), .collector(.sailor), .duo(.crab), .duo(.crab), .multiplier(.sailor), .mermaid(), .mermaid()], expectedScore: 17), // 0 + 5 + 0 + 1 + 6 + 5 + 0
+            (cards: [.collector(.sailor, color: .lightPink), .collector(.sailor, color: .lightOrange), .duo(.crab), .duo(.crab), .multiplier(.sailor), .mermaid(), .mermaid()], expectedScore: 16), // 0 + 5 + 0 + 1 + 6 + 3 + 1
+        ]
+    )
+    func scoresForHandCombinations(input: (cards: [Card], expectedScore: Int)) {
+        // GIVEN
+        let testSubject = ScoreCalculator()
 
-extension Card {
-    fileprivate static func duo(
-        _ duo: Duo,
-        id: Int = 1,
-        color: Card.Color = .black
-    ) -> Self {
-        .init(
-            id: id,
-            kind: .duo(duo),
-            color: color
-        )
-    }
+        // WHEN
+        let score = testSubject.score(playerRound: input.cards)
 
-    fileprivate static func collector(
-        _ collector: Card.Collector,
-        id: Int = 1,
-        color: Card.Color = .black
-    ) -> Self {
-        .init(
-            id: id,
-            kind: .collector(collector),
-            color: color
-        )
-    }
-
-    fileprivate static func multiplier(
-        _ multiplier: Card.Multiplier,
-        id: Int = 1,
-        color: Card.Color = .black
-    ) -> Self {
-        .init(
-            id: id,
-            kind: .multiplier(multiplier),
-            color: color
-        )
-    }
-
-    fileprivate static func mermaid(id: Int = 1) -> Self {
-        .init(
-            id: id,
-            kind: .mermaid,
-            color: .white
-        )
-    }
-
-    fileprivate static func color(
-        id: Int = 1,
-        kind: Card.Kind = .duo(.crab),
-        color: Card.Color
-    ) -> Self {
-        .init(
-            id: id,
-            kind: kind,
-            color: color
-        )
+        // THEN
+        #expect(score == input.expectedScore, "Cards: \(input.cards.map(\.kind))")
     }
 }

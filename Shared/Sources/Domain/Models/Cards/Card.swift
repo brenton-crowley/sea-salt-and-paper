@@ -43,6 +43,62 @@ extension Card {
             color: color
         )
     }
+
+    public static func duo(
+        _ duo: Duo,
+        id: Int = 1,
+        color: Card.Color = .black
+    ) -> Self {
+        .init(
+            id: id,
+            kind: .duo(duo),
+            color: color
+        )
+    }
+
+    public static func collector(
+        _ collector: Card.Collector,
+        id: Int = 1,
+        color: Card.Color = .black
+    ) -> Self {
+        .init(
+            id: id,
+            kind: .collector(collector),
+            color: color
+        )
+    }
+
+    public static func multiplier(
+        _ multiplier: Card.Multiplier,
+        id: Int = 1,
+        color: Card.Color = .black
+    ) -> Self {
+        .init(
+            id: id,
+            kind: .multiplier(multiplier),
+            color: color
+        )
+    }
+
+    public static func mermaid(id: Int = 1) -> Self {
+        .init(
+            id: id,
+            kind: .mermaid,
+            color: .white
+        )
+    }
+
+    public static func color(
+        id: Int = 1,
+        kind: Card.Kind = .duo(.crab),
+        color: Card.Color
+    ) -> Self {
+        .init(
+            id: id,
+            kind: kind,
+            color: color
+        )
+    }
 }
 
 extension Array where Element == Card {
