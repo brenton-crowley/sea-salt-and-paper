@@ -11,7 +11,7 @@ public struct GameState: Sendable {
 
     public var currentPlayer: Player? { players[currentPlayerUp] }
 
-    private(set) var deck: Deck = .init()
+    private(set) public var deck: Deck = .init()
 
     // GamePhase
 

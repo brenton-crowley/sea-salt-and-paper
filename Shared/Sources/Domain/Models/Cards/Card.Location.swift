@@ -4,8 +4,7 @@ import Foundation
 
 extension Card {
     public enum Location: Hashable, Sendable {
-        case draw
-        case discard(Pile.ID)
+        case pile(Deck.Pile.ID)
         case player(Player.ID)
     }
 }

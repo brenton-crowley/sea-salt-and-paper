@@ -2,15 +2,17 @@ import Foundation
 
 // MARK: - Definition
 
-public enum Pile: Sendable, Hashable, Identifiable {
-    case draw, discardLeft, discardRight
-
-    public var id: Pile { self }
+extension Deck {
+    public enum Pile: Sendable, Hashable, Identifiable {
+        case draw, discardLeft, discardRight
+        
+        public var id: Pile { self }
+    }
 }
 
 // MARK: - Computed Properties
 
-extension Pile {
+extension Deck.Pile {
     public var drawNumber: Int {
         switch self {
         case .draw: 2
@@ -19,17 +21,4 @@ extension Pile {
     }
 }
 
-// MARK: - Methods
-
-extension Pile {
-}
-
-// MARK: - Mocks
-
-#if DEBUG
-
-extension Pile {
-}
-
-#endif
 
