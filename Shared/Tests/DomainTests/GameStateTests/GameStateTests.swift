@@ -67,6 +67,22 @@ struct GameStateTests {
         case .four: #expect(testSubject.players == .fourPlayers)
         }
     }
+
+    @Test("Deck setup")
+    func deckSetup() {
+        // GIVEN
+        let dataProvider = GameState.DataProvider.make(
+            deckRepository: .live, // Use the actual deck of cards
+            playersInGameCount: .two
+        )
+
+        // WHEN
+        let testSubject = GameState(dataProvider: dataProvider)
+
+        // THEN
+        #expect(testSubject.deck.cards.count == 58)
+        #expect(testSubject.deck.cards.allSatisfy({ $0.location == .draw }))
+    }
 }
 
 extension Dictionary where Key == Player.ID, Value == Player {

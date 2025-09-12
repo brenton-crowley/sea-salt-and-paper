@@ -11,15 +11,13 @@ public struct GameState: Sendable {
 
     public var currentPlayer: Player? { players[currentPlayerUp] }
 
-    // Deck
-        // draw pile
-        // firstDiscardPile
-        // secondDiscardPile
+    private(set) var deck: Deck = .init()
 
     // GamePhase
 
     init(dataProvider: GameState.DataProvider) {
         self.dataProvider = dataProvider
+        setupDeck()
         setupPlayers()
     }
 }
@@ -47,6 +45,10 @@ extension GameState {
             players[.two] = Player(id: .two)
             players[.one] = Player(id: .one)
         }
+    }
+
+    private mutating func setupDeck() {
+        deck.loadDeck(dataProvider.deck())
     }
 }
 
