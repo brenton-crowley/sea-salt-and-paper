@@ -200,8 +200,7 @@ extension DataLayer: Modular {
                 Shared.sharedNetworking.dependency,
                 Shared.sharedBundle.dependency,
             ],
-            path: sourcePath,
-            resources: [.process("Resources")]
+            path: sourcePath
         )
 
         case .repositories: .target(
@@ -369,8 +368,7 @@ extension PresentationLayer: Modular {
 
                 PresentationLayer.controlsUI.dependency
             ],
-            path: sourcePath,
-            resources: [.process("Resources")]
+            path: sourcePath
         )
 
         case .controlsUI: .target( // No dependencies as only takes bindings
