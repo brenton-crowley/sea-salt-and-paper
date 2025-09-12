@@ -4,7 +4,7 @@ import Repositories
 // MARK: - Card Mappings from DeckRepository
 
 extension Card {
-    init?(from deckRepositoryCard: DeckRepository.Card) {
+    public init?(from deckRepositoryCard: DeckRepository.Card) {
         guard
             let kind = Card.Kind(from: deckRepositoryCard.kind, subType: deckRepositoryCard.subType),
             let color = Card.Color(from: deckRepositoryCard.color)

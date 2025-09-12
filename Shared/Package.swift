@@ -247,6 +247,7 @@ private enum DomainLayer: String {
 
     case models = "Models"
     case scoring = "Scoring"
+    case gameState = "GameState"
 }
 
 extension DomainLayer: Modular {
@@ -254,7 +255,8 @@ extension DomainLayer: Modular {
     var product: Product {
         switch self {
         case .models,
-            .scoring: .library(name: name, targets: [name])
+            .scoring,
+            .gameState: .library(name: name, targets: [name])
         }
     }
 
@@ -280,11 +282,17 @@ extension DomainLayer: Modular {
             path: sourcePath
         )
 
-        case .scoring: .target(
+        case .scoring, .gameState: .target(
             name: name,
             dependencies: [
+                External.swiftConcurrencyExtras,
+                External.swiftOrderedCollections,
+                External.asyncExtensions,
+
                 Shared.sharedDependency.dependency,
                 Shared.sharedBundle.dependency,
+
+                DataLayer.repositories.dependency,
 
                 DomainLayer.models.dependency
             ],
@@ -295,7 +303,7 @@ extension DomainLayer: Modular {
 
     var testTarget: Target {
         switch self {
-        case .models, .scoring: .testTarget(
+        case .models: .testTarget(
             name: testName,
             dependencies: [
                 dependency,
@@ -303,6 +311,20 @@ extension DomainLayer: Modular {
                 External.swiftIssueReporting,
 
                 DataLayer.repositories.dependency
+            ],
+            path: testPath
+        )
+
+        case .scoring, .gameState: .testTarget(
+            name: testName,
+            dependencies: [
+                dependency,
+                External.swiftConcurrencyExtras,
+                External.swiftIssueReporting,
+
+                DataLayer.repositories.dependency,
+
+                DomainLayer.models.dependency
             ],
             path: testPath
         )
