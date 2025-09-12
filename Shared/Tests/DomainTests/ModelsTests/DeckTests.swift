@@ -9,7 +9,7 @@ struct DeckTests {
         var deck = Deck()
 
         // WHEN
-        deck.loadDeck(.mock())
+        deck.loadDeck(.mockCards())
 
         // THEN
         #expect(deck.cards.map(\.location).allSatisfy({ $0 == .pile(.draw) }))
@@ -29,9 +29,9 @@ struct DeckTests {
     )
     func updateCardLocation(input: (location: Card.Location, index: Int)) throws {
         // GIVEN
-        let firstCardID = try #require(Array.mock().first(where: { $0.id == input.index })?.id)
+        let firstCardID = try #require(Array.mockCards().first(where: { $0.id == input.index })?.id)
         var deck = Deck()
-        deck.loadDeck(.mock())
+        deck.loadDeck(.mockCards())
 
         // WHEN
         deck.update(cardID: firstCardID, toLocation: input.location)
@@ -40,11 +40,106 @@ struct DeckTests {
         #expect(deck.card(id: firstCardID)?.location == input.location)
     }
 
-    // Write a for the computed properties that filter the piles to ensures they're updated.
+    @Test("Draw cards from draw pile")
+    func drawCardsFromDrawPile() throws {
+        // GIVEN
+        var testSubject = Deck()
+        testSubject.loadDeck(.mockCards())
+
+        // WHEN
+        let cards = try testSubject.draw(pile: .draw)
+
+        // THEN
+        #expect(cards.count == 2)
+        #expect(cards[0] == Array.mockCards()[0])
+        #expect(cards[1] == Array.mockCards()[1])
+    }
+
+    @Test("Draw cards from discard piles", arguments: [Deck.Pile.discardLeft, .discardRight])
+    func drawCardsFromDrawPile(pile: Deck.Pile) throws {
+        // GIVEN
+        let mockCards = Array.mockCards()
+        let discardLeftCardID = mockCards[0].id
+        let discardRightCardID = mockCards[1].id
+        var testSubject = Deck()
+        testSubject.loadDeck(.mockCards())
+
+        // WHEN
+        testSubject.update(cardID: discardLeftCardID, toLocation: .pile(.discardLeft))
+        testSubject.update(cardID: discardRightCardID, toLocation: .pile(.discardRight))
+
+        let cards = try testSubject.draw(pile: pile)
+
+        // THEN
+        switch pile {
+        case .draw: Issue.record("Shouldn't call draw pile")
+        case .discardLeft:
+            #expect(cards.count == 1)
+            #expect(cards[0].id == mockCards.first(where: { $0.id == discardLeftCardID })?.id)
+            #expect(cards[0].location == .pile(.discardLeft))
+
+        case .discardRight:
+            #expect(cards.count == 1)
+            #expect(cards[0].id == mockCards.first(where: { $0.id == discardRightCardID })?.id)
+            #expect(cards[0].location == .pile(.discardRight))
+        }
+    }
+
+    @Test("Error - Draw from empty pile", arguments: [Deck.Pile.draw, .discardLeft, .discardRight])
+    func errorWhenDrawingCardsFromEmptyDrawPile(pile: Deck.Pile) throws {
+        // GIVEN
+        var testSubject = Deck()
+        testSubject.loadDeck([])
+
+        #expect(
+            throws: Deck.Error.pileEmpty(pile).self,
+            performing: {
+                _ = try testSubject.draw(pile: pile)
+            }
+        )
+    }
+
+    @Test("Cards in hand for player")
+    func cardsInHandsForPlayer() {
+        // GIVEN
+        let mockCards = Array.mockCards()
+        var testSubject = Deck()
+        testSubject.loadDeck(mockCards)
+
+        let locations = [
+            Card.Location.player(.one),
+            .player(.two),
+            .player(.three),
+            .player(.four),
+        ]
+
+        for locationIndex in locations.indices {
+            let location = locations[locationIndex]
+            let card = mockCards[locationIndex]
+            testSubject.update(cardID: card.id, toLocation: location)
+        }
+
+        // WHEN
+        let playerOneHand = testSubject.cardsInHand(for: .one)
+        let playerTwoHand = testSubject.cardsInHand(for: .two)
+        let playerThreeHand = testSubject.cardsInHand(for: .three)
+        let playerFourHand = testSubject.cardsInHand(for: .four)
+
+        // THEN
+        #expect(playerOneHand.count == 1)
+        #expect(playerTwoHand.count == 1)
+        #expect(playerThreeHand.count == 1)
+        #expect(playerFourHand.count == 1)
+        #expect(playerOneHand.allSatisfy({ $0.location == .player(.one) }))
+        #expect(playerTwoHand.allSatisfy({ $0.location == .player(.two) }))
+        #expect(playerThreeHand.allSatisfy({ $0.location == .player(.three) }))
+        #expect(playerFourHand.allSatisfy({ $0.location == .player(.four) }))
+
+    }
 }
 
 extension Array where Element == Card {
-    fileprivate static func mock(maxCards: Int? = nil) -> Self {
+    fileprivate static func mockCards(maxCards: Int? = nil) -> Self {
         guard
             let maxCards,
             mockCards.indices.contains(maxCards)

@@ -4,6 +4,10 @@ import OrderedCollections
 // MARK: - Definition
 
 public struct Deck: Sendable, Hashable {
+    public enum Error: Swift.Error, Hashable, Sendable {
+        case pileEmpty(Pile)
+    }
+
     private(set) public var cards: OrderedSet<Card> = [] // Source of truth
 
     public init() {}
@@ -23,7 +27,7 @@ extension Deck {
     }
 }
 
-// MARK: - Methods
+// MARK: - Public API Methods
 
 extension Deck {
     public mutating func loadDeck(_ deck: [Card]) {
@@ -34,7 +38,6 @@ extension Deck {
         cards.shuffle()
     }
 
-    // Update the location of a card
     public mutating func update(cardID: Card.ID, toLocation location: Card.Location) {
         guard let cardIndex = cards.firstIndex(where: { $0.id == cardID }) else { return }
         var card = cards[cardIndex]
@@ -47,6 +50,26 @@ extension Deck {
         return card
     }
 
+    public mutating func draw(pile: Pile) throws -> Array<Card>.SubSequence {
+        switch pile {
+        case .draw:
+            guard !drawPile.isEmpty else { throw Error.pileEmpty(.draw) }
+            return drawPile.prefix(pile.drawNumber)
+
+        case .discardLeft:
+            guard !leftDiscardPile.isEmpty else { throw Error.pileEmpty(.discardLeft) }
+            return leftDiscardPile.prefix(pile.drawNumber)
+
+        case .discardRight:
+            guard !rightDiscardPile.isEmpty else { throw Error.pileEmpty(.discardRight) }
+            return rightDiscardPile.prefix(pile.drawNumber)
+        }
+    }
+}
+
+// MARK: - Private API Methods
+
+extension Deck {
     private mutating func updateCard(card: Card, at cardIndex: Int) {
         cards.remove(at: cardIndex)
         cards.insert(card, at: cardIndex)
