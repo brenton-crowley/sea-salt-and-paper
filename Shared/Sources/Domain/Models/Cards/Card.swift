@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Definition
 
-public struct Card: Hashable, Sendable {
+public struct Card: Hashable, Sendable, Identifiable {
     public let id: Int
     public let kind: Card.Kind
     public let color: Card.Color

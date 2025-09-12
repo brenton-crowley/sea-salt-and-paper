@@ -1,0 +1,352 @@
+{
+    "cards": [
+        {
+            "id": 1,
+            "kind": "multiplier",
+            "subType": "fish",
+            "color": "light-grey"
+        },
+        {
+            "id": 2,
+            "kind": "multiplier",
+            "subType": "ship",
+            "color": "purple"
+        },
+        {
+            "id": 3,
+            "kind": "multiplier",
+            "subType": "penguin",
+            "color": "light-green"
+        },
+        {
+            "id": 4,
+            "kind": "multiplier",
+            "subType": "sailor",
+            "color": "light-orange"
+        },
+        {
+            "id": 5,
+            "kind": "mermaid",
+            "subType": null,
+            "color": "white"
+        },
+        {
+            "id": 6,
+            "kind": "mermaid",
+            "subType": null,
+            "color": "white"
+        },
+        {
+            "id": 7,
+            "kind": "mermaid",
+            "subType": null,
+            "color": "white"
+        },
+        {
+            "id": 8,
+            "kind": "mermaid",
+            "subType": null,
+            "color": "white"
+        },
+        {
+            "id": 9,
+            "kind": "collector",
+            "subType": "sailor",
+            "color": "orange"
+        },
+        {
+            "id": 10,
+            "kind": "collector",
+            "subType": "sailor",
+            "color": "light-pink"
+        },
+        {
+            "id": 11,
+            "kind": "collector",
+            "subType": "octopus",
+            "color": "light-grey"
+        },
+        {
+            "id": 12,
+            "kind": "collector",
+            "subType": "octopus",
+            "color": "light-green"
+        },
+        {
+            "id": 13,
+            "kind": "collector",
+            "subType": "octopus",
+            "color": "light-blue"
+        },
+        {
+            "id": 14,
+            "kind": "collector",
+            "subType": "octopus",
+            "color": "yellow"
+        },
+        {
+            "id": 15,
+            "kind": "collector",
+            "subType": "octopus",
+            "color": "purple"
+        },
+        {
+            "id": 16,
+            "kind": "collector",
+            "subType": "shell",
+            "color": "yellow"
+        },
+        {
+            "id": 17,
+            "kind": "collector",
+            "subType": "shell",
+            "color": "light-grey"
+        },
+        {
+            "id": 18,
+            "kind": "collector",
+            "subType": "shell",
+            "color": "light-blue"
+        },
+        {
+            "id": 19,
+            "kind": "collector",
+            "subType": "shell",
+            "color": "black"
+        },
+        {
+            "id": 20,
+            "kind": "collector",
+            "subType": "shell",
+            "color": "dark-blue"
+        },
+        {
+            "id": 21,
+            "kind": "collector",
+            "subType": "shell",
+            "color": "light-green"
+        },
+        {
+            "id": 22,
+            "kind": "collector",
+            "subType": "penguin",
+            "color": "purple"
+        },
+        {
+            "id": 23,
+            "kind": "collector",
+            "subType": "penguin",
+            "color": "light-pink"
+        },
+        {
+            "id": 24,
+            "kind": "collector",
+            "subType": "penguin",
+            "color": "light-orange"
+        },
+        {
+            "id": 25,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "light-grey"
+        },
+        {
+            "id": 26,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "light-blue"
+        },
+        {
+            "id": 27,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "light-blue"
+        },
+        {
+            "id": 28,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "yellow"
+        },
+        {
+            "id": 29,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "dark-blue"
+        },
+        {
+            "id": 30,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "light-green"
+        },
+        {
+            "id": 31,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "dark-blue"
+        },
+        {
+            "id": 32,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "black"
+        },
+        {
+            "id": 33,
+            "kind": "duo",
+            "subType": "crab",
+            "color": "yellow"
+        },
+        {
+            "id": 34,
+            "kind": "duo",
+            "subType": "ship",
+            "color": "yellow"
+        },
+        {
+            "id": 35,
+            "kind": "duo",
+            "subType": "ship",
+            "color": "black"
+        },
+        {
+            "id": 36,
+            "kind": "duo",
+            "subType": "ship",
+            "color": "light-blue"
+        },
+        {
+            "id": 37,
+            "kind": "duo",
+            "subType": "ship",
+            "color": "dark-blue"
+        },
+        {
+            "id": 38,
+            "kind": "duo",
+            "subType": "ship",
+            "color": "light-blue"
+        },
+        {
+            "id": 39,
+            "kind": "duo",
+            "subType": "ship",
+            "color": "black"
+        },
+        {
+            "id": 40,
+            "kind": "duo",
+            "subType": "ship",
+            "color": "dark-blue"
+        },
+        {
+            "id": 41,
+            "kind": "duo",
+            "subType": "ship",
+            "color": "yellow"
+        },
+        {
+            "id": 42,
+            "kind": "duo",
+            "subType": "fish",
+            "color": "yellow"
+        },
+        {
+            "id": 43,
+            "kind": "duo",
+            "subType": "fish",
+            "color": "dark-blue"
+        },
+        {
+            "id": 44,
+            "kind": "duo",
+            "subType": "fish",
+            "color": "black"
+        },
+        {
+            "id": 45,
+            "kind": "duo",
+            "subType": "fish",
+            "color": "dark-blue"
+        },
+        {
+            "id": 46,
+            "kind": "duo",
+            "subType": "fish",
+            "color": "light-blue"
+        },
+        {
+            "id": 47,
+            "kind": "duo",
+            "subType": "fish",
+            "color": "light-green"
+        },
+        {
+            "id": 48,
+            "kind": "duo",
+            "subType": "fish",
+            "color": "black"
+        },
+        {
+            "id": 49,
+            "kind": "duo",
+            "subType": "shark",
+            "color": "dark-blue"
+        },
+        {
+            "id": 50,
+            "kind": "duo",
+            "subType": "shark",
+            "color": "light-green"
+        },
+        {
+            "id": 51,
+            "kind": "duo",
+            "subType": "shark",
+            "color": "black"
+        },
+        {
+            "id": 52,
+            "kind": "duo",
+            "subType": "shark",
+            "color": "light-blue"
+        },
+        {
+            "id": 53,
+            "kind": "duo",
+            "subType": "shark",
+            "color": "purple"
+        },
+        {
+            "id": 54,
+            "kind": "duo",
+            "subType": "swimmer",
+            "color": "light-blue"
+        },
+        {
+            "id": 55,
+            "kind": "duo",
+            "subType": "swimmer",
+            "color": "dark-blue"
+        },
+        {
+            "id": 56,
+            "kind": "duo",
+            "subType": "swimmer",
+            "color": "light-orange"
+        },
+        {
+            "id": 57,
+            "kind": "duo",
+            "subType": "swimmer",
+            "color": "yellow"
+        },
+        {
+            "id": 58,
+            "kind": "duo",
+            "subType": "swimmer",
+            "color": "black"
+        }
+    ]
+}

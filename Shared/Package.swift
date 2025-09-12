@@ -173,13 +173,14 @@ private enum DataLayer: String {
     static let modulePath: String = "/Data"
 
     case api = "API"
+    case repositories = "Repositories"
 }
 
 extension DataLayer: Modular {
     /// Products define the executables and libraries a package produces, making them visible to other packages.
     var product: Product {
         switch self {
-        case .api: .library(name: name, targets: [name])
+        case .api, .repositories: .library(name: name, targets: [name])
         }
     }
 
@@ -197,7 +198,21 @@ extension DataLayer: Modular {
 
                 Shared.sharedDependency.dependency,
                 Shared.sharedNetworking.dependency,
-                Shared.sharedBundle.dependency
+                Shared.sharedBundle.dependency,
+            ],
+            path: sourcePath,
+            resources: [.process("Resources")]
+        )
+
+        case .repositories: .target(
+            name: name,
+            dependencies: [
+                External.swiftConcurrencyExtras,
+
+                Shared.sharedDependency.dependency,
+                Shared.sharedBundle.dependency,
+                Shared.sharedFileStorage.dependency,
+                Shared.sharedLogger.dependency
             ],
             path: sourcePath,
             resources: [.process("Resources")]
@@ -207,12 +222,13 @@ extension DataLayer: Modular {
 
     var testTarget: Target {
         switch self {
-        case .api: .testTarget(
+        case .api, .repositories: .testTarget(
             name: testName,
             dependencies: [
                 External.asyncExtensions,
                 External.swiftConcurrencyExtras,
                 External.swiftIssueReporting,
+
                 dependency
             ],
             path: testPath
@@ -229,7 +245,6 @@ extension DataLayer: Modular {
 private enum DomainLayer: String {
     static let modulePath: String = "/Domain"
 
-    case repositories = "Repositories"
     case models = "Models"
     case scoring = "Scoring"
 }
@@ -238,8 +253,7 @@ extension DomainLayer: Modular {
     /// Products define the executables and libraries a package produces, making them visible to other packages.
     var product: Product {
         switch self {
-        case .repositories,
-            .models,
+        case .models,
             .scoring: .library(name: name, targets: [name])
         }
     }
@@ -250,7 +264,7 @@ extension DomainLayer: Modular {
     /// A `DomainLayer` target should only depend on targets from Data
     var target: Target {
         switch self {
-        case .repositories, .models: .target(
+        case .models: .target(
             name: name,
             dependencies: [
                 External.swiftConcurrencyExtras,
@@ -260,6 +274,8 @@ extension DomainLayer: Modular {
                 Shared.sharedDependency.dependency,
                 Shared.sharedNetworking.dependency,
                 Shared.sharedBundle.dependency,
+
+                DataLayer.repositories.dependency
             ],
             path: sourcePath
         )
@@ -279,12 +295,14 @@ extension DomainLayer: Modular {
 
     var testTarget: Target {
         switch self {
-        case .repositories, .models, .scoring: .testTarget(
+        case .models, .scoring: .testTarget(
             name: testName,
             dependencies: [
+                dependency,
                 External.swiftConcurrencyExtras,
                 External.swiftIssueReporting,
-                dependency
+
+                DataLayer.repositories.dependency
             ],
             path: testPath
         )
@@ -326,8 +344,6 @@ extension PresentationLayer: Modular {
                 External.swiftUINavigation, // Hashable Object
 
                 Shared.sharedDependency.dependency,
-
-                DomainLayer.repositories.dependency,
 
                 PresentationLayer.controlsUI.dependency
             ],
