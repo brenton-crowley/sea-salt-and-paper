@@ -103,8 +103,8 @@ extension ScoreCalculator.DuoScore {
 extension Card.Collector {
     fileprivate func score(countInCollection: Int) -> Int {
         switch (self, countInCollection) {
-        case (.shell, _): (countInCollection - 1) * 2
-        case (.octopus, _): (countInCollection - 1) * 3
+        case (.shell, _) where countInCollection <= 5: (countInCollection - 1) * 2
+        case (.octopus, _) where countInCollection <= 6: (countInCollection - 1) * 3
         case (.penguin, 1): 1
         case (.penguin, 2): 3
         case (.penguin, 3): 5
