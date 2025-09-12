@@ -1,23 +1,90 @@
 @testable import GameState
+import Models
 import Testing
 
 struct GameStateTests {
-    @Test("Cycle through players")
-    func nextPlayerChangesCurrentPlayer() async throws {
+    @Test(
+        "Cycle through players",
+        arguments: [Player.InGameCount.two, .three, .four]
+    )
+    func nextPlayerChangesCurrentPlayer(playersInGame: Player.InGameCount) async throws {
         // GIVEN
-        var testSubject = GameState(dataProvider: .testValue)
-        #expect(testSubject.currentPlayer == .one)
+        let dataProvider = GameState.DataProvider.make(
+            deckRepository: .mock,
+            playersInGameCount: playersInGame
+        )
 
-        testSubject.nextPlayer()
-        #expect(testSubject.currentPlayer == .two)
+        var testSubject = GameState(dataProvider: dataProvider)
 
-        testSubject.nextPlayer()
-        #expect(testSubject.currentPlayer == .three)
+        // Current player should be 1UP
+        #expect(testSubject.currentPlayerUp == .one)
 
-        testSubject.nextPlayer()
-        #expect(testSubject.currentPlayer == .four)
+        // Cycle three the players depending on the players in the game
+        switch playersInGame {
+        case .two:
+            testSubject.nextPlayer()
+            #expect(testSubject.currentPlayerUp == .two, "Players in game: \(playersInGame)")
 
+        case .three:
+            testSubject.nextPlayer()
+            #expect(testSubject.currentPlayerUp == .two)
+            testSubject.nextPlayer()
+            #expect(testSubject.currentPlayerUp == .three)
+        case .four:
+            testSubject.nextPlayer()
+            #expect(testSubject.currentPlayerUp == .two)
+            testSubject.nextPlayer()
+            #expect(testSubject.currentPlayerUp == .three)
+            testSubject.nextPlayer()
+            #expect(testSubject.currentPlayerUp == .four)
+        }
+
+        // Next player should always be player one when at the end of the players in the game.
         testSubject.nextPlayer()
-        #expect(testSubject.currentPlayer == .one)
+        #expect(testSubject.currentPlayerUp == .one)
     }
+
+    @Test(
+        "Setup Players",
+        arguments: [Player.InGameCount.two, .three, .four]
+    )
+    func setupPlayers(playersInGame: Player.InGameCount) async throws {
+        // GIVEN
+        let dataProvider = GameState.DataProvider.make(
+            deckRepository: .mock,
+            playersInGameCount: playersInGame
+        )
+
+        // WHEN
+        let testSubject = GameState(dataProvider: dataProvider)
+
+        #expect(testSubject.currentPlayer == .init(id: .one))
+
+        // THEN
+        switch playersInGame {
+        case .two: #expect(testSubject.players == .twoPlayers)
+        case .three: #expect(testSubject.players == .threePlayers)
+        case .four: #expect(testSubject.players == .fourPlayers)
+        }
+    }
+}
+
+extension Dictionary where Key == Player.ID, Value == Player {
+    fileprivate static let twoPlayers: Self = [
+        .one: .init(id: .one),
+        .two: .init(id: .two)
+    ]
+
+    fileprivate static let threePlayers: Self = [
+        .one: .init(id: .one),
+        .two: .init(id: .two),
+        .three: .init(id: .three)
+    ]
+
+    fileprivate static let fourPlayers: Self = [
+        .one: .init(id: .one),
+        .two: .init(id: .two),
+        .three: .init(id: .three),
+        .four: .init(id: .four),
+    ]
 }

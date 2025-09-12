@@ -3,15 +3,13 @@ import Models
 import SharedDependency
 
 public struct GameState: Sendable {
-    public enum PlayerCount: Hashable {
-        case two, three, four
-    }
-
     let dataProvider: GameState.DataProvider
 
     // Players
-    // Current player index
-    var currentPlayer: Player.Number = .one
+    var players: [Player.ID: Player] = [:]
+    var currentPlayerUp: Player.Up = .one
+
+    public var currentPlayer: Player? { players[currentPlayerUp] }
 
     // Deck
         // draw pile
@@ -22,34 +20,72 @@ public struct GameState: Sendable {
 
     init(dataProvider: GameState.DataProvider) {
         self.dataProvider = dataProvider
+        setupPlayers()
     }
 }
 
 // MARK: - Public API
 extension GameState {
     mutating func nextPlayer() {
-        currentPlayer = currentPlayer.next()
+        currentPlayerUp = currentPlayerUp.next(playersInGame: players.values.count.playersInGameCount)
+    }
+}
+
+// MARK: - Private API
+extension GameState {
+    private mutating func setupPlayers() {
+        switch dataProvider.playersInGameCount() {
+        case .four:
+            players[.four] = Player(id: .four)
+            fallthrough
+
+        case .three:
+            players[.three] = Player(id: .three)
+            fallthrough
+
+        case .two:
+            players[.two] = Player(id: .two)
+            players[.one] = Player(id: .one)
+        }
+    }
+}
+
+extension Int {
+    fileprivate var playersInGameCount: Player.InGameCount {
+        switch self {
+        case 2: .two
+        case 3: .three
+        case 4: .four
+        default: .two
+        }
     }
 }
 
 extension GameState: DependencyModeKey {
     public static func live(
-        players: PlayerCount
+        players: Player.InGameCount
     ) -> Self {
-        .init(dataProvider: .default)
+        .init(
+            dataProvider: .make(
+                deckRepository: .live,
+                playersInGameCount: players
+            )
+        )
     }
 
     public static let live: GameState = .init(dataProvider: .default)
 
     public static let mock: GameState = .init(
         dataProvider: .init(
-            deck: { .mockGames }
+            deck: { .mockGames },
+            playersInGameCount: { .two }
         )
     )
 
     public static let mockError: GameState = .init(
         dataProvider: .init(
-            deck: { [] }
+            deck: { [] },
+            playersInGameCount: { .two }
         )
     )
 }
