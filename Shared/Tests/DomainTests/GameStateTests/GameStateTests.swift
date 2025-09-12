@@ -81,7 +81,7 @@ struct GameStateTests {
 
         // THEN
         #expect(testSubject.deck.cards.count == 58)
-        #expect(testSubject.deck.cards.allSatisfy({ $0.location == .draw }))
+        #expect(testSubject.deck.cards.allSatisfy({ $0.location == .pile(.draw) }))
         #expect(testSubject.deck.drawPile.count == 58)
         #expect(testSubject.deck.leftDiscardPile.count == 0)
         #expect(testSubject.deck.rightDiscardPile.count == 0)
