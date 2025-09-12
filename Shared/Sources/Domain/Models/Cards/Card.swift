@@ -7,6 +7,8 @@ public struct Card: Hashable, Sendable, Identifiable {
     public let kind: Card.Kind
     public let color: Card.Color
 
+    public var location: Card.Location = .pile(.draw)
+
     public init(
         id: Int, 
         kind: Card.Kind,
