@@ -3,6 +3,21 @@ import Models
 import Testing
 
 struct GameStateTests {
+    @Test("GameState init")
+    func gameStateInit() {
+        // GIVEN
+        let dataProvider = GameState.DataProvider.make(
+            deckRepository: .live,
+            playersInGameCount: .two
+        )
+
+        // WHEN
+        let testSubject = GameState(dataProvider: dataProvider)
+
+        // THEN
+        #expect(testSubject.phase == .waitingForDraw)
+    }
+
     @Test(
         "Cycle through players",
         arguments: [Player.InGameCount.two, .three, .four]

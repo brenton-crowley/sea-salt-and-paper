@@ -5,15 +5,13 @@ import SharedDependency
 public struct GameState: Sendable {
     let dataProvider: GameState.DataProvider
 
-    // Players
     var players: [Player.ID: Player] = [:]
     var currentPlayerUp: Player.Up = .one
 
     public var currentPlayer: Player? { players[currentPlayerUp] }
 
     private(set) var deck: Deck = .init()
-
-    // GamePhase
+    private(set) var phase: Game.Phase = .waitingForDraw
 
     init(dataProvider: GameState.DataProvider) {
         self.dataProvider = dataProvider
