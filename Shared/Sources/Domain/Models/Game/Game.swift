@@ -4,15 +4,19 @@ import Foundation
 
 public struct Game: Sendable, Hashable, Identifiable {
     public let id: Int
+
+    var deck: Deck = .init()
+    var phase: Game.Phase = .waitingForDraw
 }
 
 // MARK: - Computed Properties
 
 extension Game {}
 
-// MARK: - Mapping
+// MARK: - Methods
 
 extension Game {
+
 }
 
 // MARK: - Mocks
