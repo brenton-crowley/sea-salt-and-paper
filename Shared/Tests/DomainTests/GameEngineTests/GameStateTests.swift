@@ -1,4 +1,4 @@
-@testable import GameState
+@testable import GameEngine
 import Models
 import Testing
 

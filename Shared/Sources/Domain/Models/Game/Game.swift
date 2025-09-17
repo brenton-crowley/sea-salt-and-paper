@@ -7,11 +7,18 @@ public struct Game: Sendable, Hashable, Identifiable {
 
     var deck: Deck = .init()
     var phase: Game.Phase = .waitingForDraw
+
+    public init(id: Int, deck: Deck = .init(), phase: Game.Phase = .waitingForDraw) {
+        self.id = id
+        self.deck = deck
+        self.phase = phase
+    }
 }
 
 // MARK: - Computed Properties
 
-extension Game {}
+extension Game {
+}
 
 // MARK: - Methods
 
@@ -28,6 +35,12 @@ extension Game {
         .init(
             id: id
         )
+    }
+
+    public static func testMock(id: Int = 0) -> Self {
+        var game = Self(id: id)
+        game.deck.loadDeck(.testMock)
+        return game
     }
 }
 

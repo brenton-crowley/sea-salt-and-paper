@@ -1,7 +1,7 @@
 import Foundation
 
 extension ThrowingCommand where S == Deck {
-    static func drawPilePickUp(player: Player.Up) throws -> Self {
+    static func drawPilePickUp(player: Player.Up) -> Self {
         .init(
             execute: { deck in
                 try deck.draw(pile: .draw)
