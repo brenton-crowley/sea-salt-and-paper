@@ -6,13 +6,13 @@ struct GameStateTests {
     @Test("GameState init")
     func gameStateInit() {
         // GIVEN
-        let dataProvider = GameState.DataProvider.make(
+        let dataProvider = GameEngine.DataProvider.make(
             deckRepository: .live,
             playersInGameCount: .two
         )
 
         // WHEN
-        let testSubject = GameState(dataProvider: dataProvider)
+        let testSubject = GameEngine(dataProvider: dataProvider)
 
         // THEN
         #expect(testSubject.phase == .waitingForDraw)
@@ -24,12 +24,12 @@ struct GameStateTests {
     )
     func nextPlayerChangesCurrentPlayer(playersInGame: Player.InGameCount) async throws {
         // GIVEN
-        let dataProvider = GameState.DataProvider.make(
+        let dataProvider = GameEngine.DataProvider.make(
             deckRepository: .mock,
             playersInGameCount: playersInGame
         )
 
-        var testSubject = GameState(dataProvider: dataProvider)
+        var testSubject = GameEngine(dataProvider: dataProvider)
 
         // Current player should be 1UP
         #expect(testSubject.currentPlayerUp == .one)
@@ -65,13 +65,13 @@ struct GameStateTests {
     )
     func setupPlayers(playersInGame: Player.InGameCount) async throws {
         // GIVEN
-        let dataProvider = GameState.DataProvider.make(
+        let dataProvider = GameEngine.DataProvider.make(
             deckRepository: .mock,
             playersInGameCount: playersInGame
         )
 
         // WHEN
-        let testSubject = GameState(dataProvider: dataProvider)
+        let testSubject = GameEngine(dataProvider: dataProvider)
 
         #expect(testSubject.currentPlayer == .init(id: .one))
 
@@ -86,13 +86,13 @@ struct GameStateTests {
     @Test("Deck setup")
     func deckSetup() {
         // GIVEN
-        let dataProvider = GameState.DataProvider.make(
+        let dataProvider = GameEngine.DataProvider.make(
             deckRepository: .live, // Use the actual deck of cards
             playersInGameCount: .two
         )
 
         // WHEN
-        let testSubject = GameState(dataProvider: dataProvider)
+        let testSubject = GameEngine(dataProvider: dataProvider)
 
         // THEN
         #expect(testSubject.deck.cards.count == 58)

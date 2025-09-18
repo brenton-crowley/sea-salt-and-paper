@@ -48,6 +48,7 @@ private enum External: String, CaseIterable {
     case asyncAlgorithms = "swift-async-algorithms"
     case sideEffectIOAsyncExtensions = "asyncextensions"
     case pointFreeXCTestDynamicOverlay = "xctest-dynamic-overlay"
+    case pointFreeDependencies = "swift-dependencies"
 
     var name: String { rawValue }
 
@@ -60,6 +61,7 @@ private enum External: String, CaseIterable {
         case .asyncAlgorithms: .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "1.0.4")
         case .sideEffectIOAsyncExtensions: .package(url: "https://github.com/sideeffect-io/AsyncExtensions.git", from: "0.5.3")
         case .pointFreeXCTestDynamicOverlay: .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git", from: "1.5.2")
+        case .pointFreeDependencies: .package(url: "https://github.com/pointfreeco/swift-dependencies.git", from: "1.9.5")
         }
     }
 
@@ -77,6 +79,7 @@ extension External {
     static var swiftAsyncAlgorithms: Target.Dependency { .product(name: "AsyncAlgorithms", package: External.asyncAlgorithms.name) }
     static var asyncExtensions: Target.Dependency { .product(name: "AsyncExtensions", package: External.sideEffectIOAsyncExtensions.name) }
     static var swiftIssueReporting: Target.Dependency { .product(name: "IssueReporting", package: External.pointFreeXCTestDynamicOverlay.name) }
+    static var swiftDependencies: Target.Dependency { .product(name: "Dependencies", package: External.pointFreeDependencies.name) }
 }
 
 // MARK: - Shared
@@ -287,6 +290,7 @@ extension DomainLayer: Modular {
                 External.swiftConcurrencyExtras,
                 External.swiftOrderedCollections,
                 External.asyncExtensions,
+                External.swiftDependencies,
 
                 Shared.sharedDependency.dependency,
                 Shared.sharedBundle.dependency,

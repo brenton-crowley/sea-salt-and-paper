@@ -3,9 +3,9 @@ import Foundation
 extension ThrowingCommand where S == Game {
     static func throwingGameCommand(_ command: ThrowingCommand<Game>) -> Self { command }
 
-    public static func pickUpFromDrawPile(player: Player.Up) -> Self {
+    public static func pickUpFromDrawPile() -> Self {
         .init { game in
-            try ThrowingCommand<Deck>.drawPilePickUp(player: player).execute(on: &game.deck)
+            try ThrowingCommand<Deck>.drawPilePickUp(player: game.currentPlayerUp).execute(on: &game.deck)
             Command<Game>.changePhase(to: .waitingForDiscard).execute(on: &game)
         }
     }
