@@ -3,16 +3,65 @@ import Foundation
 // MARK: - Definition
 
 public struct Game: Sendable, Hashable, Identifiable {
-    public let id: Int
+    public let id: UUID
+
+    var players: [Player.ID: Player] = [:]
+    var deck: Deck = .init()
+    var phase: Game.Phase = .waitingForDraw
+    var currentPlayerUp: Player.Up = .one
+
+    public init(id: UUID, cards: [Card], playersInGame: Player.InGameCount) {
+        self.id = id
+        self.deck.loadDeck(cards)
+        setupPlayers(playersInGame)
+    }
 }
 
 // MARK: - Computed Properties
 
-extension Game {}
+extension Game {
+    public var currentPlayer: Player? { players[currentPlayerUp] }
+}
 
-// MARK: - Mapping
+// MARK: - Public Methods
 
 extension Game {
+    public mutating func nextPlayer() {
+        currentPlayerUp = currentPlayerUp.next(playersInGame: players.values.count.playersInGameCount)
+    }
+}
+
+// MARK: - Private API
+
+extension Game {
+    private mutating func setupPlayers(_ playersInGameCount: Player.InGameCount) {
+        switch playersInGameCount {
+        case .four:
+            players[.four] = Player(id: .four)
+            fallthrough
+
+        case .three:
+            players[.three] = Player(id: .three)
+            fallthrough
+
+        case .two:
+            players[.two] = Player(id: .two)
+            players[.one] = Player(id: .one)
+        }
+    }
+}
+
+// MARK: - Fileprivate Helper Extensions
+
+extension Int {
+    fileprivate var playersInGameCount: Player.InGameCount {
+        switch self {
+        case 2: .two
+        case 3: .three
+        case 4: .four
+        default: .two
+        }
+    }
 }
 
 // MARK: - Mocks
@@ -20,10 +69,20 @@ extension Game {
 #if DEBUG
 
 extension Game {
-    public static func mock(id: Int) -> Self {
+    public static func mock(
+        id: UUID,
+        cards: [Card] = .testMock,
+        playersInGame: Player.InGameCount = .two
+    ) -> Self {
         .init(
-            id: id
+            id: id,
+            cards: cards,
+            playersInGame: playersInGame
         )
+    }
+
+    public static func testMock(id: UUID) -> Self {
+        Game.mock(id: id)
     }
 }
 

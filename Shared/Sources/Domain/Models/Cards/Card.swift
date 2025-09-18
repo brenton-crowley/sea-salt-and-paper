@@ -107,6 +107,13 @@ extension Array where Element == Card {
     public static let mockGames: Self = [
         .mock(id: 0)
     ]
+
+    public static let testMock: Self = [
+        .mock(id: 0, kind: .mermaid, color: .black),
+        .mock(id: 1, kind: .duo(.fish), color: .darkBlue),
+        .mock(id: 2, kind: .duo(.crab), color: .orange),
+        .mock(id: 3, kind: .collector(.octopus), color: .yellow),
+    ]
 }
 
 #endif

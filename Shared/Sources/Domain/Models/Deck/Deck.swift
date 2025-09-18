@@ -81,7 +81,9 @@ extension Deck {
 #if DEBUG
 
 extension Deck {
-
+    public static func mock() -> Self {
+        .init()
+    }
 }
 
 #endif

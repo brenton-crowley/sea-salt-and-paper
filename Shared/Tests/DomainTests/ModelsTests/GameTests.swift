@@ -1,18 +1,16 @@
-@testable import GameState
-import Models
+@testable import Models
+import Foundation
 import Testing
 
-struct GameStateTests {
-    @Test("GameState init")
-    func gameStateInit() {
-        // GIVEN
-        let dataProvider = GameState.DataProvider.make(
-            deckRepository: .live,
-            playersInGameCount: .two
-        )
-
+struct GameTests {
+    @Test("GameState init", arguments: [Player.InGameCount.two, .three, .four])
+    func gameStateInit(playersInGameCount: Player.InGameCount) {
         // WHEN
-        let testSubject = GameState(dataProvider: dataProvider)
+        let testSubject = Game(
+            id: .mockID,
+            cards: .testMock,
+            playersInGame: playersInGameCount
+        )
 
         // THEN
         #expect(testSubject.phase == .waitingForDraw)
@@ -24,12 +22,11 @@ struct GameStateTests {
     )
     func nextPlayerChangesCurrentPlayer(playersInGame: Player.InGameCount) async throws {
         // GIVEN
-        let dataProvider = GameState.DataProvider.make(
-            deckRepository: .mock,
-            playersInGameCount: playersInGame
+        var testSubject = Game(
+            id: .mockID,
+            cards: .testMock,
+            playersInGame: playersInGame
         )
-
-        var testSubject = GameState(dataProvider: dataProvider)
 
         // Current player should be 1UP
         #expect(testSubject.currentPlayerUp == .one)
@@ -65,13 +62,11 @@ struct GameStateTests {
     )
     func setupPlayers(playersInGame: Player.InGameCount) async throws {
         // GIVEN
-        let dataProvider = GameState.DataProvider.make(
-            deckRepository: .mock,
-            playersInGameCount: playersInGame
+        var testSubject = Game(
+            id: .mockID,
+            cards: .testMock,
+            playersInGame: playersInGame
         )
-
-        // WHEN
-        let testSubject = GameState(dataProvider: dataProvider)
 
         #expect(testSubject.currentPlayer == .init(id: .one))
 
@@ -83,26 +78,29 @@ struct GameStateTests {
         }
     }
 
-    @Test("Deck setup")
-    func deckSetup() {
+    @Test("Deck setup", arguments: [Player.InGameCount.two, .three, .four])
+    func deckSetup(playersInGame: Player.InGameCount) {
         // GIVEN
-        let dataProvider = GameState.DataProvider.make(
-            deckRepository: .live, // Use the actual deck of cards
-            playersInGameCount: .two
+        let cards = [Card].testMock
+        var testSubject = Game(
+            id: .mockID,
+            cards: .testMock,
+            playersInGame: playersInGame
         )
 
-        // WHEN
-        let testSubject = GameState(dataProvider: dataProvider)
-
         // THEN
-        #expect(testSubject.deck.cards.count == 58)
+        #expect(testSubject.deck.cards.count == cards.count)
         #expect(testSubject.deck.cards.allSatisfy({ $0.location == .pile(.draw) }))
-        #expect(testSubject.deck.drawPile.count == 58)
+        #expect(testSubject.deck.drawPile.count == cards.count)
         #expect(testSubject.deck.leftDiscardPile.count == 0)
         #expect(testSubject.deck.rightDiscardPile.count == 0)
         #expect(testSubject.deck.cardsInHand(for: .one).count == 0)
         #expect(testSubject.deck.cardsInHand(for: .two).count == 0)
     }
+}
+
+extension UUID {
+    fileprivate static let mockID: Self = .init(0)
 }
 
 extension Dictionary where Key == Player.ID, Value == Player {
