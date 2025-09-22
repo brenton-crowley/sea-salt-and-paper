@@ -23,7 +23,7 @@ extension Deck {
     public var drawPile: [Card] { cards.filter({ $0.location == .pile(.draw) }) }
 
     public func cardsInHand(for player: Player.Up) -> [Card] {
-        cards.filter { $0.location == .player(player) }
+        cards.filter { $0.location == .playerHand(player) }
     }
 }
 
@@ -63,6 +63,22 @@ extension Deck {
         case .discardRight:
             guard !rightDiscardPile.isEmpty else { throw Error.pileEmpty(.discardRight) }
             return rightDiscardPile.prefix(pile.drawNumber)
+        }
+    }
+
+    public func canDiscard(to pile: Deck.Pile) -> Bool {
+        switch pile {
+        case .draw: false // Can never discard to draw pile
+        case .discardLeft:
+            leftDiscardPile.isEmpty
+            ? true // If this pile is empty, then yes.
+            : !rightDiscardPile.isEmpty // When this pile has cards, only discard when right is empty.
+
+        case .discardRight:
+            rightDiscardPile.isEmpty
+            ? true // If this pile is empty, then yes.
+            : !leftDiscardPile.isEmpty // When this pile has cards, only discard when left is empty.
+
         }
     }
 }

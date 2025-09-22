@@ -5,7 +5,7 @@ extension ThrowingCommand where S == Deck {
         .init(
             execute: { deck in
                 try deck.draw(pile: .draw)
-                    .forEach { deck.update(cardID: $0.id, toLocation: .player(player)) }
+                    .forEach { deck.update(cardID: $0.id, toLocation: .playerHand(player)) }
             }
         )
     }

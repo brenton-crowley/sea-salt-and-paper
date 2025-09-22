@@ -29,6 +29,10 @@ extension Game {
     public mutating func nextPlayer() {
         currentPlayerUp = currentPlayerUp.next(playersInGame: players.values.count.playersInGameCount)
     }
+
+    public func phase(equals phase: Game.Phase) -> Bool {
+        self.phase == phase
+    }
 }
 
 // MARK: - Private API

@@ -21,10 +21,10 @@ struct DeckTests {
             (location: Card.Location.pile(.discardLeft), index: 1),
             (location: .pile(.draw), index: 2),
             (location: .pile(.discardRight), index: 3),
-            (location: .player(.one), index: 4),
-            (location: .player(.two), index: 5),
-            (location: .player(.three), index: 6),
-            (location: .player(.four), index: 7)
+            (location: .playerHand(.one), index: 4),
+            (location: .playerHand(.two), index: 5),
+            (location: .playerHand(.three), index: 6),
+            (location: .playerHand(.four), index: 7)
         ]
     )
     func updateCardLocation(input: (location: Card.Location, index: Int)) throws {
@@ -107,10 +107,10 @@ struct DeckTests {
         testSubject.loadDeck(mockCards)
 
         let locations = [
-            Card.Location.player(.one),
-            .player(.two),
-            .player(.three),
-            .player(.four),
+            Card.Location.playerHand(.one),
+            .playerHand(.two),
+            .playerHand(.three),
+            .playerHand(.four),
         ]
 
         for locationIndex in locations.indices {
@@ -130,11 +130,63 @@ struct DeckTests {
         #expect(playerTwoHand.count == 1)
         #expect(playerThreeHand.count == 1)
         #expect(playerFourHand.count == 1)
-        #expect(playerOneHand.allSatisfy({ $0.location == .player(.one) }))
-        #expect(playerTwoHand.allSatisfy({ $0.location == .player(.two) }))
-        #expect(playerThreeHand.allSatisfy({ $0.location == .player(.three) }))
-        #expect(playerFourHand.allSatisfy({ $0.location == .player(.four) }))
+        #expect(playerOneHand.allSatisfy({ $0.location == .playerHand(.one) }))
+        #expect(playerTwoHand.allSatisfy({ $0.location == .playerHand(.two) }))
+        #expect(playerThreeHand.allSatisfy({ $0.location == .playerHand(.three) }))
+        #expect(playerFourHand.allSatisfy({ $0.location == .playerHand(.four) }))
 
+    }
+
+    @Test("Can discard to left pile")
+    func canDiscardToLeftPile() {
+        // GIVEN
+        let mockCards = Array.mockCards()
+        var testSubject = Deck()
+        testSubject.loadDeck(mockCards)
+
+        // THEN
+        #expect(testSubject.canDiscard(to: .discardLeft))
+        #expect(!testSubject.canDiscard(to: .draw))
+
+        // WHEN - Move the first card from draw to left discard
+        testSubject.update(cardID: mockCards[0].id, toLocation: .pile(.discardLeft))
+
+        // THEN - Should not be able to discard left
+        #expect(!testSubject.canDiscard(to: .discardLeft))
+        #expect(!testSubject.canDiscard(to: .draw))
+
+        // WHEN - Move the second card from draw to right discard
+        testSubject.update(cardID: mockCards[1].id, toLocation: .pile(.discardRight))
+
+        // THEN - Should be able to discard
+        #expect(testSubject.canDiscard(to: .discardLeft))
+        #expect(!testSubject.canDiscard(to: .draw))
+    }
+
+    @Test("Can discard to right pile")
+    func canDiscardToRightPile() {
+        // GIVEN
+        let mockCards = Array.mockCards()
+        var testSubject = Deck()
+        testSubject.loadDeck(mockCards)
+
+        // THEN
+        #expect(testSubject.canDiscard(to: .discardRight))
+        #expect(!testSubject.canDiscard(to: .draw))
+
+        // WHEN - Move the first card from draw to left discard
+        testSubject.update(cardID: mockCards[0].id, toLocation: .pile(.discardRight))
+
+        // THEN - Should not be able to discard left
+        #expect(!testSubject.canDiscard(to: .discardRight))
+        #expect(!testSubject.canDiscard(to: .draw))
+
+        // WHEN - Move the second card from draw to right discard
+        testSubject.update(cardID: mockCards[1].id, toLocation: .pile(.discardLeft))
+
+        // THEN - Should be able to discard
+        #expect(testSubject.canDiscard(to: .discardRight))
+        #expect(!testSubject.canDiscard(to: .draw))
     }
 }
 
