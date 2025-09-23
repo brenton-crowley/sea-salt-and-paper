@@ -20,14 +20,10 @@ public struct GameEngine: Sendable {
 
 // MARK: - Public API
 extension GameEngine {
-    public mutating func playAction(_ action: Game.Action) throws {
-        guard case .valid = action.isPlayable(in: game) else { return } // Maybe throw here
-        // we can also place a guard in here to make sure that the action can be played.
-        switch action {
-        case .drawPilePickUp: try playThrowingCommand(.pickUpFromDrawPile())
-        case let .discardToLeftPile(cardID): playCommand(.discardToLeftPile(cardID: cardID))
-        case let .discardToRightPile(cardID): playCommand(.discardToRightPile(cardID: cardID))
-        }
+    public mutating func playAction(_ action: GameEngine.Action) throws {
+        guard action.validationRule.validate(on: game) else { return } // Maybe throw here
+
+        try action.play(on: &game)
     }
 }
 
@@ -39,14 +35,6 @@ extension GameEngine {
             cards: cards,
             playersInGame: playersInGameCount
         )
-    }
-
-    private mutating func playCommand(_ command: Command<Game>) {
-        command.execute(on: &game)
-    }
-
-    private mutating func playThrowingCommand(_ command: ThrowingCommand<Game>) throws {
-        try command.execute(on: &game)
     }
 }
 
@@ -72,15 +60,5 @@ extension GameEngine: DependencyModeKey {
 // MARK: - Extensions
 extension Game {
     static let placeholder: Self = .init(id: .init(0), cards: [], playersInGame: .two)
-}
-
-extension Game.Action {
-    func isPlayable(in game: Game) -> GameEngine.ActionValidation {
-        return switch self {
-        case .drawPilePickUp: .valid
-        case let .discardToRightPile(cardID): .invalid
-        case let .discardToLeftPile(cardID): .invalid
-        }
-    }
 }
 

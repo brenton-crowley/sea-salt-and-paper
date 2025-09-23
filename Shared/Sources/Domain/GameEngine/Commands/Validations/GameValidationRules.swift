@@ -1,4 +1,5 @@
 import Foundation
+import Models
 
 // MARK: - Definition
 
@@ -12,7 +13,7 @@ extension ValidationRule {
         return true
     }
 
-    public static let drawFromLeftDiscardPile: Self = .init { game in
+    public static let ruleToDrawFromLeftDiscardPile: Self = .init { game in
         guard
             game.phase(equals: .waitingForDraw),
             !game.deck.leftDiscardPile.isEmpty
@@ -21,7 +22,7 @@ extension ValidationRule {
         return true
     }
 
-    public static let drawFromRightDiscardPile: Self = .init { game in
+    public static let ruleToDrawFromRightDiscardPile: Self = .init { game in
         guard
             game.phase(equals: .waitingForDraw),
             !game.deck.rightDiscardPile.isEmpty
@@ -41,8 +42,4 @@ extension ValidationRule {
             return game.deck.canDiscard(to: pile)
         }
     }
-}
-
-extension Game {
-    
 }
