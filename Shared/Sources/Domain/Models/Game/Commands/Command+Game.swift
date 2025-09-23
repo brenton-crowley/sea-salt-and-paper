@@ -1,19 +1,9 @@
 import Foundation
 
-extension ThrowingCommand where S == Game {
-    static func throwingGameCommand(_ command: ThrowingCommand<Game>) -> Self { command }
-
-    public static func pickUpFromDrawPile() -> Self {
-        .init { game in
-            try ThrowingCommand<Deck>.drawPilePickUp(player: game.currentPlayerUp).execute(on: &game.deck)
-            Command<Game>.changePhase(to: .waitingForDiscard).execute(on: &game)
-        }
-    }
-}
-
 // MARK: - Command
 extension Command where S == Game {
     static func gameCommand(_ command: Command<Game>) -> Self { command }
+    static func changePhase(to phase: Game.Phase) -> Self { .init(execute: { $0.phase = phase }) }
 
     public static func discardToLeftPile(cardID: Card.ID) -> Self { discardCard(id: cardID, to: .discardLeft) }
     public static func discardToRightPile(cardID: Card.ID) -> Self { discardCard(id: cardID, to: .discardRight) }

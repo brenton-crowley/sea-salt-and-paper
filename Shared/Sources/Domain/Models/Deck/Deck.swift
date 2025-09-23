@@ -23,7 +23,7 @@ extension Deck {
     public var drawPile: [Card] { cards.filter({ $0.location == .pile(.draw) }) }
 
     public func cardsInHand(for player: Player.Up) -> [Card] {
-        cards.filter { $0.location == .player(player) }
+        cards.filter { $0.location == .playerHand(player) }
     }
 }
 

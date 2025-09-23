@@ -5,10 +5,10 @@ import Foundation
 public struct Game: Sendable, Hashable, Identifiable {
     public let id: UUID
 
-    var players: [Player.ID: Player] = [:]
-    var deck: Deck = .init()
-    var phase: Game.Phase = .waitingForDraw
-    var currentPlayerUp: Player.Up = .one
+    internal(set) public var players: [Player.ID: Player] = [:]
+    internal(set) public var deck: Deck = .init()
+    internal(set) public var phase: Game.Phase = .waitingForDraw
+    internal(set) public var currentPlayerUp: Player.Up = .one
 
     public init(id: UUID, cards: [Card], playersInGame: Player.InGameCount) {
         self.id = id
@@ -28,6 +28,10 @@ extension Game {
 extension Game {
     public mutating func nextPlayer() {
         currentPlayerUp = currentPlayerUp.next(playersInGame: players.values.count.playersInGameCount)
+    }
+
+    public func phase(equals phase: Game.Phase) -> Bool {
+        self.phase == phase
     }
 }
 

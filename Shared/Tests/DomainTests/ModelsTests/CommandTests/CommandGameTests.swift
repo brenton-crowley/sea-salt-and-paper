@@ -23,7 +23,7 @@ struct CommandGameTests {
         try command.execute(on: &game)
    
         // THEN
-        #expect(game.deck.cards[0...1].map(\.location) == [.player(player), .player(player)])
+        #expect(game.deck.cards[0...1].map(\.location) == [.playerHand(player), .playerHand(player)])
         #expect(game.phase == .waitingForDiscard)
     }
    
@@ -45,7 +45,7 @@ struct CommandGameTests {
         try command.execute(on: &game)
    
         // THEN
-        #expect(game.deck.cards.last?.location == .player(player))
+        #expect(game.deck.cards.last?.location == .playerHand(player))
         #expect(game.phase == .waitingForDiscard)
     }
    
