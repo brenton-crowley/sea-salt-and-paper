@@ -26,7 +26,7 @@ extension GameEngine.Action {
 // MARK: - Computed Properties
 
 extension GameEngine.Action {
-    var validationRule: ValidationRule {
+    var validationRule: ValidationRule<Game> {
         return switch self {
         case .user(.drawPilePickUp): .ruleToPickUpFromDrawPile
         case .user(.pickUpFromLeftDiscard): .ruleToDrawFromLeftDiscardPile

@@ -3,8 +3,8 @@ import Models
 
 // MARK: - Definition
 
-extension ValidationRule {
-    public static let ruleToPickUpFromDrawPile: Self = .init { game in
+extension ValidationRule where Input == Game {
+    static let ruleToPickUpFromDrawPile: Self = .init { game in
         guard
             game.phase(equals: .waitingForDraw),
             !game.deck.drawPile.isEmpty
@@ -13,7 +13,7 @@ extension ValidationRule {
         return true
     }
 
-    public static let ruleToDrawFromLeftDiscardPile: Self = .init { game in
+    static let ruleToDrawFromLeftDiscardPile: Self = .init { game in
         guard
             game.phase(equals: .waitingForDraw),
             !game.deck.leftDiscardPile.isEmpty
@@ -22,7 +22,7 @@ extension ValidationRule {
         return true
     }
 
-    public static let ruleToDrawFromRightDiscardPile: Self = .init { game in
+    static let ruleToDrawFromRightDiscardPile: Self = .init { game in
         guard
             game.phase(equals: .waitingForDraw),
             !game.deck.rightDiscardPile.isEmpty
@@ -31,7 +31,7 @@ extension ValidationRule {
         return true
     }
 
-    public static func ruleToDiscard(cardID: Card.ID, onto pile: Deck.Pile) -> Self {
+    static func ruleToDiscard(cardID: Card.ID, onto pile: Deck.Pile) -> Self {
         .init { game in
             guard
                 game.phase(equals: .waitingForDiscard),
@@ -39,7 +39,7 @@ extension ValidationRule {
                 card.location == .playerHand(game.currentPlayerUp)
             else { return false }
 
-            return game.deck.canDiscard(to: pile)
+            return ValidationRule<Deck>.canDiscard(to: pile).validate(on: game.deck)
         }
     }
 }

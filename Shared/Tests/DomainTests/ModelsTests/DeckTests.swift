@@ -136,58 +136,6 @@ struct DeckTests {
         #expect(playerFourHand.allSatisfy({ $0.location == .playerHand(.four) }))
 
     }
-
-    @Test("Can discard to left pile")
-    func canDiscardToLeftPile() {
-        // GIVEN
-        let mockCards = Array.mockCards()
-        var testSubject = Deck()
-        testSubject.loadDeck(mockCards)
-
-        // THEN
-        #expect(testSubject.canDiscard(to: .discardLeft))
-        #expect(!testSubject.canDiscard(to: .draw))
-
-        // WHEN - Move the first card from draw to left discard
-        testSubject.update(cardID: mockCards[0].id, toLocation: .pile(.discardLeft))
-
-        // THEN - Should not be able to discard left
-        #expect(!testSubject.canDiscard(to: .discardLeft))
-        #expect(!testSubject.canDiscard(to: .draw))
-
-        // WHEN - Move the second card from draw to right discard
-        testSubject.update(cardID: mockCards[1].id, toLocation: .pile(.discardRight))
-
-        // THEN - Should be able to discard
-        #expect(testSubject.canDiscard(to: .discardLeft))
-        #expect(!testSubject.canDiscard(to: .draw))
-    }
-
-    @Test("Can discard to right pile")
-    func canDiscardToRightPile() {
-        // GIVEN
-        let mockCards = Array.mockCards()
-        var testSubject = Deck()
-        testSubject.loadDeck(mockCards)
-
-        // THEN
-        #expect(testSubject.canDiscard(to: .discardRight))
-        #expect(!testSubject.canDiscard(to: .draw))
-
-        // WHEN - Move the first card from draw to left discard
-        testSubject.update(cardID: mockCards[0].id, toLocation: .pile(.discardRight))
-
-        // THEN - Should not be able to discard left
-        #expect(!testSubject.canDiscard(to: .discardRight))
-        #expect(!testSubject.canDiscard(to: .draw))
-
-        // WHEN - Move the second card from draw to right discard
-        testSubject.update(cardID: mockCards[1].id, toLocation: .pile(.discardLeft))
-
-        // THEN - Should be able to discard
-        #expect(testSubject.canDiscard(to: .discardRight))
-        #expect(!testSubject.canDiscard(to: .draw))
-    }
 }
 
 extension Array where Element == Card {

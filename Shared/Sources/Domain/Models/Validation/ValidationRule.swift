@@ -1,15 +1,15 @@
 import Foundation
 
-public struct ValidationRule: Sendable {
-    var ruleIsValid: @Sendable (_ game: Game) -> Bool
+public struct ValidationRule<Input>: Sendable {
+    var ruleIsValid: @Sendable (_ input: Input) -> Bool
 
-    public init(rule: @Sendable @escaping (_ game: Game) -> Bool) {
+    public init(rule: @Sendable @escaping (_ input: Input) -> Bool) {
         self.ruleIsValid = rule
     }
 }
 
 extension ValidationRule {
-    public func validate(on game: Game) -> Bool {
-        ruleIsValid(game)
+    public func validate(on input: Input) -> Bool {
+        ruleIsValid(input)
     }
 }
