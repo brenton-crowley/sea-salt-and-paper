@@ -324,6 +324,8 @@ extension DomainLayer: Modular {
                 dependency,
                 External.swiftConcurrencyExtras,
                 External.swiftIssueReporting,
+                External.swiftDependencies,
+                External.swiftOrderedCollections,
 
                 DataLayer.repositories.dependency,
 

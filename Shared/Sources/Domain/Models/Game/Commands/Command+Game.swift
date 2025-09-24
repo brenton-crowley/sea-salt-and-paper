@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Command
 extension Command where S == Game {
     static func gameCommand(_ command: Command<Game>) -> Self { command }
-    static func changePhase(to phase: Game.Phase) -> Self { .init(execute: { $0.phase = phase }) }
+    static func changePhase(to phase: Game.Phase) -> Self { .init(execute: { $0.set(phase: phase) }) }
 
     public static func discardToLeftPile(cardID: Card.ID) -> Self { discardCard(id: cardID, to: .discardLeft) }
     public static func discardToRightPile(cardID: Card.ID) -> Self { discardCard(id: cardID, to: .discardRight) }

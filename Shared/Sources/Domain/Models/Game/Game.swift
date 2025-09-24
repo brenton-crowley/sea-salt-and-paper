@@ -7,7 +7,7 @@ public struct Game: Sendable, Hashable, Identifiable {
 
     internal(set) public var players: [Player.ID: Player] = [:]
     internal(set) public var deck: Deck = .init()
-    internal(set) public var phase: Game.Phase = .waitingForDraw
+    internal(set) public var phase: Game.Phase = .waitingForStart
     internal(set) public var currentPlayerUp: Player.Up = .one
 
     public init(id: UUID, cards: [Card], playersInGame: Player.InGameCount) {
@@ -26,12 +26,24 @@ extension Game {
 // MARK: - Public Methods
 
 extension Game {
+    public func phase(equals phase: Game.Phase) -> Bool {
+        self.phase == phase
+    }
+
     public mutating func nextPlayer() {
         currentPlayerUp = currentPlayerUp.next(playersInGame: players.values.count.playersInGameCount)
     }
 
-    public func phase(equals phase: Game.Phase) -> Bool {
-        self.phase == phase
+    public mutating func set(phase: Game.Phase) {
+        self.phase = phase
+    }
+
+    public mutating func draw(pile: Deck.Pile) throws -> Array<Card>.SubSequence {
+        try deck.draw(pile: pile)
+    }
+
+    public mutating func update(cardID: Card.ID, toLocation location: Card.Location) {
+        deck.update(cardID: cardID, toLocation: location)
     }
 }
 

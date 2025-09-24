@@ -23,4 +23,6 @@ extension ThrowingCommand where S == Game {
             Command<Game>.changePhase(to: .waitingForPlay).execute(on: &game)
         }
     }
+
+    
 }

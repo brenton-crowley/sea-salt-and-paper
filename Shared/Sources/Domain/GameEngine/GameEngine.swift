@@ -20,21 +20,46 @@ public struct GameEngine: Sendable {
 
 // MARK: - Public API
 extension GameEngine {
-    public mutating func playAction(_ action: GameEngine.Action) throws {
-        guard action.validationRule.validate(on: game) else { return } // Maybe throw here
+    public mutating func performAction(_ action: GameEngine.Action) throws {
+        guard actionIsPlayable(action) else { return } // Maybe throw here
 
-        try action.play(on: &game)
+        switch action {
+        case let .user(userAction): try userAction.play(on: &game)
+        case let .system(systemAction): try runSystemAction(systemAction)
+        }
+    }
+
+    public func actionIsPlayable(_ action: GameEngine.Action) -> Bool {
+        action.validationRule.validate(on: game)
     }
 }
 
 // MARK: - Private API
 extension GameEngine {
+    private mutating func runSystemAction(_ systemAction: Action.System) throws {
+        switch systemAction {
+        case let .createGame(players):
+            // Should probably save the current game
+            // Should bundle this up into a command on game engine
+            createGame(playersInGameCount: players)
+        case .prepareDeckForPlay: break
+        }
+    }
+
     private mutating func createGame(playersInGameCount: Player.InGameCount) {
+        saveGame()
+
         self.game = Game(
             id: dataProvider.newGameID(),
-            cards: cards,
+            cards: dataProvider.shuffleCards(cards),
             playersInGame: playersInGameCount
         )
+
+        
+    }
+
+    private func saveGame() {
+        dataProvider.saveGame(game)
     }
 }
 
@@ -45,14 +70,18 @@ extension GameEngine: DependencyModeKey {
     public static let mock: GameEngine = .init(
         dataProvider: .init(
             deck: { .testMock },
-            newGameID: { .init(0) }
+            newGameID: { .init(0) },
+            saveGame: { _ in },
+            shuffleCards: { $0 }
         )
     )
 
     public static let mockError: GameEngine = .init(
         dataProvider: .init(
             deck: { [] },
-            newGameID: { .init(0) }
+            newGameID: { .init(0) },
+            saveGame: { _ in },
+            shuffleCards: { $0 }
         )
     )
 }

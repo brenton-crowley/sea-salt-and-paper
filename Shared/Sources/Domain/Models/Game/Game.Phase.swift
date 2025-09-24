@@ -4,6 +4,7 @@ import Foundation
 
 extension Game {
     public enum Phase: Sendable, Hashable, Identifiable {
+         case waitingForStart
          case waitingForDraw
          case waitingForDiscard
          case waitingForPlay

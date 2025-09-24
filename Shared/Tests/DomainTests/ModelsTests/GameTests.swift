@@ -13,7 +13,7 @@ struct GameTests {
         )
 
         // THEN
-        #expect(testSubject.phase == .waitingForDraw)
+        #expect(testSubject.phase == .waitingForStart)
     }
 
     @Test(

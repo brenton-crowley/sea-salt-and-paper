@@ -1,8 +1,64 @@
-//
-//  File.swift
-//  Shared
-//
-//  Created by Brent Crowley on 23/9/2025.
-//
-
 import Foundation
+import Models
+
+extension Array where Element == Card {
+    static let gameEngineMockCards: Self = [
+        .mock(id: 2, kind: .multiplier(.ship), color: .purple),
+        .mock(id: 3, kind: .multiplier(.penguin), color: .lightGreen),
+        .mock(id: 4, kind: .multiplier(.sailor), color: .lightOrange),
+        .mock(id: 5, kind: .mermaid, color: .white),
+        .mock(id: 6, kind: .mermaid, color: .white),
+        .mock(id: 7, kind: .mermaid, color: .white),
+        .mock(id: 8, kind: .mermaid, color: .white),
+        .mock(id: 9, kind: .collector(.sailor), color: .orange),
+        .mock(id: 10, kind: .collector(.sailor), color: .lightPink),
+        .mock(id: 11, kind: .collector(.octopus), color: .lightGrey),
+        .mock(id: 12, kind: .collector(.octopus), color: .lightGreen),
+        .mock(id: 13, kind: .collector(.octopus), color: .lightBlue),
+        .mock(id: 14, kind: .collector(.octopus), color: .yellow),
+        .mock(id: 15, kind: .collector(.octopus), color: .purple),
+        .mock(id: 16, kind: .collector(.shell), color: .yellow),
+        .mock(id: 17, kind: .collector(.shell), color: .lightGrey),
+        .mock(id: 18, kind: .collector(.shell), color: .lightBlue),
+        .mock(id: 19, kind: .collector(.shell), color: .black),
+        .mock(id: 20, kind: .collector(.shell), color: .darkBlue),
+        .mock(id: 21, kind: .collector(.shell), color: .lightGreen),
+        .mock(id: 22, kind: .collector(.penguin), color: .purple),
+        .mock(id: 23, kind: .collector(.penguin), color: .lightPink),
+        .mock(id: 24, kind: .collector(.penguin), color: .lightOrange),
+        .mock(id: 25, kind: .duo(.crab), color: .lightGrey),
+        .mock(id: 26, kind: .duo(.crab), color: .lightBlue),
+        .mock(id: 27, kind: .duo(.crab), color: .lightBlue),
+        .mock(id: 28, kind: .duo(.crab), color: .yellow),
+        .mock(id: 29, kind: .duo(.crab), color: .darkBlue),
+        .mock(id: 30, kind: .duo(.crab), color: .lightGreen),
+        .mock(id: 31, kind: .duo(.crab), color: .darkBlue),
+        .mock(id: 32, kind: .duo(.crab), color: .black),
+        .mock(id: 33, kind: .duo(.crab), color: .yellow),
+        .mock(id: 34, kind: .duo(.ship), color: .yellow),
+        .mock(id: 35, kind: .duo(.ship), color: .black),
+        .mock(id: 36, kind: .duo(.ship), color: .lightBlue),
+        .mock(id: 37, kind: .duo(.ship), color: .darkBlue),
+        .mock(id: 38, kind: .duo(.ship), color: .lightBlue),
+        .mock(id: 39, kind: .duo(.ship), color: .black),
+        .mock(id: 40, kind: .duo(.ship), color: .darkBlue),
+        .mock(id: 41, kind: .duo(.ship), color: .yellow),
+        .mock(id: 42, kind: .duo(.fish), color: .yellow),
+        .mock(id: 43, kind: .duo(.fish), color: .darkBlue),
+        .mock(id: 44, kind: .duo(.fish), color: .black),
+        .mock(id: 45, kind: .duo(.fish), color: .darkBlue),
+        .mock(id: 46, kind: .duo(.fish), color: .lightBlue),
+        .mock(id: 47, kind: .duo(.fish), color: .lightGreen),
+        .mock(id: 48, kind: .duo(.fish), color: .black),
+        .mock(id: 49, kind: .duo(.shark), color: .darkBlue),
+        .mock(id: 50, kind: .duo(.shark), color: .lightGreen),
+        .mock(id: 51, kind: .duo(.shark), color: .black),
+        .mock(id: 52, kind: .duo(.shark), color: .lightBlue),
+        .mock(id: 53, kind: .duo(.shark), color: .purple),
+        .mock(id: 54, kind: .duo(.swimmer), color: .lightBlue),
+        .mock(id: 55, kind: .duo(.swimmer), color: .darkBlue),
+        .mock(id: 56, kind: .duo(.swimmer), color: .lightOrange),
+        .mock(id: 57, kind: .duo(.swimmer), color: .yellow),
+        .mock(id: 58, kind: .duo(.swimmer), color: .black),
+    ]
+}
