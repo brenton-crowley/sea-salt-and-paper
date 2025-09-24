@@ -2,6 +2,7 @@ import Foundation
 import IssueReporting
 import Models
 import Repositories
+import SharedID
 
 extension GameEngine {
     struct DataProvider: Sendable {
