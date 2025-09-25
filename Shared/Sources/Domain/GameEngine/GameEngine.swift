@@ -7,9 +7,10 @@ import SharedLogger
 public struct GameEngine: Sendable {
     let dataProvider: GameEngine.DataProvider
 
-    private(set) public var game: Game = .placeholder
+    internal(set) public var game: Game = .placeholder
 
-    private let cards: [Card]
+    let cards: [Card]
+
     private let logger = Logger(for: Self.self)
 
     init(dataProvider: GameEngine.DataProvider) {
@@ -24,41 +25,22 @@ extension GameEngine {
         guard actionIsPlayable(action) else { return } // Maybe throw here
 
         switch action {
-        case let .user(userAction): try userAction.play(on: &game)
-        case let .system(systemAction): try runSystemAction(systemAction)
+        case let .user(user): try user.action.command().execute(on: &game)
+        case let .system(system): try system.action.command().execute(on: &self)
         }
     }
 
     public func actionIsPlayable(_ action: GameEngine.Action) -> Bool {
-        action.validationRule.validate(on: game)
+        switch action {
+        case let .user(user): user.action.rule().validate(on: game)
+        case let .system(system): system.action.rule().validate(on: self)
+        }
     }
 }
 
-// MARK: - Private API
+// MARK: - Internal/Private API
 extension GameEngine {
-    private mutating func runSystemAction(_ systemAction: Action.System) throws {
-        switch systemAction {
-        case let .createGame(players):
-            // Should probably save the current game
-            // Should bundle this up into a command on game engine
-            createGame(playersInGameCount: players)
-        case .prepareDeckForPlay: break
-        }
-    }
-
-    private mutating func createGame(playersInGameCount: Player.InGameCount) {
-        saveGame()
-
-        self.game = Game(
-            id: dataProvider.newGameID(),
-            cards: dataProvider.shuffleCards(cards),
-            playersInGame: playersInGameCount
-        )
-
-        
-    }
-
-    private func saveGame() {
+    func saveGame() {
         dataProvider.saveGame(game)
     }
 }

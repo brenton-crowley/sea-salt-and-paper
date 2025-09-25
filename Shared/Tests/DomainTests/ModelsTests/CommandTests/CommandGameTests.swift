@@ -17,7 +17,7 @@ struct CommandGameTests {
     func successPickUpFromDrawPileExecute(player: Player.Up) throws {
         // GIVEN
         var game = gameWithNumPlayers(.four, playerUp: player)
-        let command: ThrowingCommand<Game> = .pickUpFromDrawPile()
+        let command: Command<Game> = .pickUpFromDrawPile()
 
         // WHEN
         try command.execute(on: &game)
@@ -39,7 +39,7 @@ struct CommandGameTests {
             .filter { $0.id != game.deck.cards.last?.id }
             .forEach { game.deck.update(cardID: $0.id, toLocation: .pile(.discardRight)) }
    
-        let command: ThrowingCommand<Game> = .pickUpFromDrawPile()
+        let command: Command<Game> = .pickUpFromDrawPile()
    
         // WHEN
         try command.execute(on: &game)
@@ -59,7 +59,7 @@ struct CommandGameTests {
         // Remove all the cards from the draw pile.
         game.deck.cards.forEach { game.deck.update(cardID: $0.id, toLocation: .pile(.discardLeft)) }
    
-        let command: ThrowingCommand<Game> = .pickUpFromDrawPile()
+        let command: Command<Game> = .pickUpFromDrawPile()
    
         // WHEN
         #expect(
