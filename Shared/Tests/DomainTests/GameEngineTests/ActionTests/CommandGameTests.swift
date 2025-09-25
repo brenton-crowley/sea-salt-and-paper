@@ -5,8 +5,9 @@
 //  Created by Brent Crowley on 17/9/2025.
 //
 
-@testable import Models
+@testable import GameEngine
 import Foundation
+import Models
 import Testing
 
 struct CommandGameTests {
@@ -17,7 +18,8 @@ struct CommandGameTests {
     func successPickUpFromDrawPileExecute(player: Player.Up) throws {
         // GIVEN
         var game = gameWithNumPlayers(.four, playerUp: player)
-        let command: ThrowingCommand<Game> = .pickUpFromDrawPile()
+        let action = Action<Game>.pickUpFromDrawPile
+        let command: Command<Game> = action.command()
 
         // WHEN
         try command.execute(on: &game)
@@ -37,10 +39,11 @@ struct CommandGameTests {
         // Make only last card draw pile card
         game.deck.cards
             .filter { $0.id != game.deck.cards.last?.id }
-            .forEach { game.deck.update(cardID: $0.id, toLocation: .pile(.discardRight)) }
+            .forEach { game.update(cardID: $0.id, toLocation: .pile(.discardRight)) }
    
-        let command: ThrowingCommand<Game> = .pickUpFromDrawPile()
-   
+        let action = Action<Game>.pickUpFromDrawPile
+        let command: Command<Game> = action.command()
+
         // WHEN
         try command.execute(on: &game)
    
@@ -57,10 +60,11 @@ struct CommandGameTests {
         // GIVEN
         var game = Game.testMock(id: .mockID)
         // Remove all the cards from the draw pile.
-        game.deck.cards.forEach { game.deck.update(cardID: $0.id, toLocation: .pile(.discardLeft)) }
+        game.deck.cards.forEach { game.update(cardID: $0.id, toLocation: .pile(.discardLeft)) }
    
-        let command: ThrowingCommand<Game> = .pickUpFromDrawPile()
-   
+        let action = Action<Game>.pickUpFromDrawPile
+        let command: Command<Game> = action.command()
+
         // WHEN
         #expect(
             throws: Deck.Error.pileEmpty(.draw),
@@ -68,32 +72,17 @@ struct CommandGameTests {
         )
     }
    
-    @Test(
-        "Success - Change phase command",
-        arguments: [Game.Phase.endRound, .endTurn, .resolvingEffects]
-    )
-    func successChangeGamePhaseTo(phase: Game.Phase) {
-        // GIVEN
-        let command: Command<Game> = .changePhase(to: phase)
-        var game = Game.testMock(id: .mockID)
-
-        // WHEN
-        command.execute(on: &game)
-   
-        // THEN
-        #expect(game.phase == phase)
-    }
-   
     @Test("Success - Discard to left pile")
     func successDiscardCardToLeftPile() throws {
         // GIVEN
         var game = Game.testMock(id: .mockID)
         let firstCard = try #require(game.deck.cards.first)
-        let command: Command<Game> = .discardToLeftPile(cardID: firstCard.id)
-   
+        let action = Action<Game>.discardToLeftPile(cardID: firstCard.id)
+        let command: Command<Game> = action.command()
+
         // WHEN
-        command.execute(on: &game)
-   
+        try command.execute(on: &game)
+
         // THEN
         #expect(game.deck.cards.first?.location == .pile(.discardLeft))
     }
@@ -103,10 +92,11 @@ struct CommandGameTests {
         // GIVEN
         var game = Game.testMock(id: .mockID)
         let firstCard = try #require(game.deck.cards.first)
-        let command: Command<Game> = .discardToRightPile(cardID: firstCard.id)
-   
+        let action = Action<Game>.discardToRightPile(cardID: firstCard.id)
+        let command: Command<Game> = action.command()
+
         // WHEN
-        command.execute(on: &game)
+        try command.execute(on: &game)
    
         // THEN
         #expect(game.deck.cards.first?.location == .pile(.discardRight))

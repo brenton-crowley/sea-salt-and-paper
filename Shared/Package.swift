@@ -94,6 +94,7 @@ private enum Shared: String {
     case sharedDependency = "SharedDependency"
     case sharedFileStorage = "SharedFileStorage"
     case sharedLogger = "SharedLogger"
+    case sharedID = "SharedID"
     // Probably add a shared storage so that a repository can cache
 }
 
@@ -106,7 +107,8 @@ extension Shared: Modular {
             .sharedBundle,
             .sharedDependency,
             .sharedFileStorage,
-            .sharedLogger: .library(name: name, targets: [name])
+            .sharedLogger,
+            .sharedID: .library(name: name, targets: [name])
         }
     }
 
@@ -116,7 +118,7 @@ extension Shared: Modular {
     /// A `Shared` target should never depend on anything other than a third-party library.
     var target: Target {
         switch self {
-        case .sharedDependency, .sharedLogger: .target(name: name, path: sourcePath) // Must not have any dependencies
+        case .sharedDependency, .sharedLogger, .sharedID: .target(name: name, path: sourcePath) // Must not have any dependencies
         case .sharedNavigation: .target(name: name, dependencies: [External.swiftUINavigation], path: sourcePath)
         case .sharedBundle: .target(name: name, dependencies: [Shared.sharedDependency.dependency], path: sourcePath)
 
@@ -151,7 +153,8 @@ extension Shared: Modular {
             .sharedNavigation,
             .sharedBundle,
             .sharedFileStorage,
-            .sharedLogger:
+            .sharedLogger,
+            .sharedID:
                 .testTarget(name: testName, dependencies: [dependency], path: testPath)
 
         case .sharedNetworking: .testTarget(
@@ -294,6 +297,7 @@ extension DomainLayer: Modular {
 
                 Shared.sharedDependency.dependency,
                 Shared.sharedBundle.dependency,
+                Shared.sharedID.dependency,
 
                 DataLayer.repositories.dependency,
 
@@ -324,6 +328,8 @@ extension DomainLayer: Modular {
                 dependency,
                 External.swiftConcurrencyExtras,
                 External.swiftIssueReporting,
+                External.swiftDependencies,
+                External.swiftOrderedCollections,
 
                 DataLayer.repositories.dependency,
 

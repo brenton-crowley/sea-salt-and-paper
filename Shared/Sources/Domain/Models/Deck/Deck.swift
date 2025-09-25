@@ -34,10 +34,6 @@ extension Deck {
         cards = OrderedSet(deck)
     }
 
-    public mutating func shuffle() {
-        cards.shuffle()
-    }
-
     public mutating func update(cardID: Card.ID, toLocation location: Card.Location) {
         guard let cardIndex = cards.firstIndex(where: { $0.id == cardID }) else { return }
         var card = cards[cardIndex]

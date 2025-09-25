@@ -7,9 +7,10 @@ import SharedLogger
 public struct GameEngine: Sendable {
     let dataProvider: GameEngine.DataProvider
 
-    private(set) public var game: Game = .placeholder
+    internal(set) public var game: Game = .placeholder
 
-    private let cards: [Card]
+    let cards: [Card]
+
     private let logger = Logger(for: Self.self)
 
     init(dataProvider: GameEngine.DataProvider) {
@@ -20,21 +21,27 @@ public struct GameEngine: Sendable {
 
 // MARK: - Public API
 extension GameEngine {
-    public mutating func playAction(_ action: GameEngine.Action) throws {
-        guard action.validationRule.validate(on: game) else { return } // Maybe throw here
+    public mutating func performAction(_ action: GameEngine.Action) throws {
+        guard actionIsPlayable(action) else { return } // Maybe throw here
 
-        try action.play(on: &game)
+        switch action {
+        case let .user(user): try user.action.command().execute(on: &game)
+        case let .system(system): try system.action.command().execute(on: &self)
+        }
+    }
+
+    public func actionIsPlayable(_ action: GameEngine.Action) -> Bool {
+        switch action {
+        case let .user(user): user.action.rule().validate(on: game)
+        case let .system(system): system.action.rule().validate(on: self)
+        }
     }
 }
 
-// MARK: - Private API
+// MARK: - Internal/Private API
 extension GameEngine {
-    private mutating func createGame(playersInGameCount: Player.InGameCount) {
-        self.game = Game(
-            id: dataProvider.newGameID(),
-            cards: cards,
-            playersInGame: playersInGameCount
-        )
+    func saveGame() {
+        dataProvider.saveGame(game)
     }
 }
 
@@ -45,14 +52,18 @@ extension GameEngine: DependencyModeKey {
     public static let mock: GameEngine = .init(
         dataProvider: .init(
             deck: { .testMock },
-            newGameID: { .init(0) }
+            newGameID: { .init(0) },
+            saveGame: { _ in },
+            shuffleCards: { $0 }
         )
     )
 
     public static let mockError: GameEngine = .init(
         dataProvider: .init(
             deck: { [] },
-            newGameID: { .init(0) }
+            newGameID: { .init(0) },
+            saveGame: { _ in },
+            shuffleCards: { $0 }
         )
     )
 }
