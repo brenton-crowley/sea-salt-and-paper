@@ -10,13 +10,16 @@ extension GameEngine {
             deckRepository: .live,
             playersInGameCount: .two,
             shuffler: .live,
-            uuidService: .live
+            uuidService: .live,
+            broadcaster: .live
         )
 
         var deck: @Sendable () -> [Card]
         var newGameID: @Sendable () -> Game.ID
         var saveGame: @Sendable (_ game: Game) -> Void
         var shuffleCards: @Sendable (_ cards: [Card]) -> [Card]
+        var streamOfGameEngineEvents: @Sendable () -> AsyncStream<GameEngine.Event>
+        var sendEvent: @Sendable (_ event: GameEngine.Event) -> Void
     }
 }
 
@@ -25,13 +28,16 @@ extension GameEngine.DataProvider {
         deckRepository: DeckRepository,
         playersInGameCount: Player.InGameCount,
         shuffler: Shuffler,
-        uuidService: UUIDService
+        uuidService: UUIDService,
+        broadcaster: GameBroadcast
     ) -> Self {
         .init(
             deck: { deckRepository.deck.compactMap(Card.init(from:)) },
             newGameID: { uuidService.generateUUID() },
             saveGame: { _ in print("\(#function) - Implement save game in \(Self.self)")  },
-            shuffleCards: { shuffler.shuffle(cards: $0) }
+            shuffleCards: { shuffler.shuffle(cards: $0) },
+            streamOfGameEngineEvents: { broadcaster.streamOfGameEvents() },
+            sendEvent: { broadcaster.sendGameEvent($0) }
         )
     }
 }
@@ -44,7 +50,9 @@ extension GameEngine.DataProvider {
             deck: { fatalError("Unimplemented") },
             newGameID: { fatalError("Unimplemented") },
             saveGame: { _ in fatalError("Unimplemented") },
-            shuffleCards: { _ in fatalError("Unimplemented") }
+            shuffleCards: { _ in fatalError("Unimplemented") },
+            streamOfGameEngineEvents: { fatalError("Unimplemented") },
+            sendEvent: { _ in fatalError("Unimplemented") }
         )
     }
 }

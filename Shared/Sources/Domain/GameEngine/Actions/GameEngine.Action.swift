@@ -19,6 +19,8 @@ extension GameEngine.Action {
         case pickUpFromRightDiscard
         case discardToRightPile(Card.ID)
         case discardToLeftPile(Card.ID)
+        case playEffectWithCards(Card.ID, Card.ID)
+        case stealCard(Card.ID)
 
         public var id: Self { self }
     }
@@ -42,13 +44,15 @@ extension GameEngine.Action {
 
 extension GameEngine.Action.User {
     /// Maps a public facing case from ``GameEngine/GameEngine/Action/User`` to an internal command that can be performed on the game.
-    var action: Action<Game> {
+    var action: Action<GameEngine> {
         switch self {
         case .drawPilePickUp: .pickUpFromDrawPile
         case .pickUpFromLeftDiscard: .pickUpFromLeftDiscardPile
         case .pickUpFromRightDiscard: .pickUpFromRightDiscardPile
         case let .discardToRightPile(cardID): .discardToRightPile(cardID: cardID)
         case let .discardToLeftPile(cardID): .discardToLeftPile(cardID: cardID)
+        case let .playEffectWithCards(card1, card2): .playEffect(cards: (card1, card2))
+        case let .stealCard(cardID): .stealCard(cardID: cardID)
         }
     }
 }
