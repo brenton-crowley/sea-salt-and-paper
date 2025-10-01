@@ -102,6 +102,39 @@ struct WaitingForPlayCommandTests {
             ]
         )
     }
+
+    @Test(
+        "Play Effect - Swimmer and Shark Duo",
+        arguments: [
+            [Card.duo(.swimmer, id: 0, location: .playerHand(.one)),
+                .duo(.shark, id: 1, location: .playerHand(.one))],
+            [Card.duo(.shark, id: 2, location: .playerHand(.one)),
+                .duo(.swimmer, id: 4, location: .playerHand(.one))],
+        ]
+    )
+    func playEffectSwimmerAndShark(mockCards: [Card]) throws {
+        // GIVEN
+        var game = Game(id: .mockGameID(), cards: mockCards, playersInGame: .two)
+        game.set(phase: .waitingForPlay) // Makes action valid
+        // Current player is one
+        let playerCards = mockCards.filter({ $0.location == .playerHand(game.currentPlayerUp) })
+
+        let action = Action<Game>.playEffect(cards: (playerCards[0].id, playerCards[1].id))
+
+        #expect(action.rule().validate(on: game))
+
+        // WHEN
+        try action.command().execute(on: &game)
+
+        // THEN
+        #expect(game.phase == .resolvingEffect(.stealCard))
+        #expect(
+            game.deck.cards.map(\.location) == [
+                .playerEffects(.one),
+                .playerEffects(.one),
+            ]
+        )
+    }
 }
 
 extension Array where Element == Card {

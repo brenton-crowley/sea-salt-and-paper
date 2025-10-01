@@ -76,18 +76,15 @@ extension Command where S == Game {
             game.update(cardID: cards.0, toLocation: .playerEffects(game.currentPlayerUp))
             game.update(cardID: cards.1, toLocation: .playerEffects(game.currentPlayerUp))
 
-
             // Play the effect
             guard let (firstCard, secondCard) = game.effectCards(cardIDs: cards) else { return }
 
-            // TODO: Implement effect
             switch (firstCard.kind, secondCard.kind) {
             case (.duo(.crab), .duo(.crab)): try playPairOfCrabs.execute(on: &game)
             case (.duo(.fish), .duo(.fish)): try playPairOfFish.execute(on: &game)
             case (.duo(.ship), .duo(.ship)): try playPairOfShips.execute(on: &game)
             case (.duo(.shark), .duo(.swimmer)),
-                (.duo(.swimmer), .duo(.shark))
-                : break // steal from player, needs player choice
+                (.duo(.swimmer), .duo(.shark)): try playSwimmerAndShark.execute(on: &game)
 
             default: break
             }
