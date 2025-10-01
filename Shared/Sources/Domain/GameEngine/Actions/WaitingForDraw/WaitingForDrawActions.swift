@@ -46,7 +46,7 @@ extension ValidationRule where Input == Game {
 
     fileprivate static let ruleToDrawFromLeftDiscardPile: Self = .init { game in
         guard
-            game.phase(equals: .waitingForDraw),
+            game.phase(equals: .waitingForDraw) || game.phase(equals: .resolvingEffect(.pickUpDiscard)),
             !game.deck.leftDiscardPile.isEmpty
         else { return false }
 
@@ -55,7 +55,7 @@ extension ValidationRule where Input == Game {
 
     static let ruleToDrawFromRightDiscardPile: Self = .init { game in
         guard
-            game.phase(equals: .waitingForDraw),
+            game.phase(equals: .waitingForDraw) || game.phase(equals: .resolvingEffect(.pickUpDiscard)),
             !game.deck.rightDiscardPile.isEmpty
         else { return false }
 
@@ -110,10 +110,13 @@ extension Command where S == Game {
 
     fileprivate static func pickUpFromDiscardPile(_ pile: Deck.Pile) -> Self {
         .init { game in
-            guard pile != .draw else { throw Error.attemptedDrawPilePickUpFromDiscardPile }
+            let card = switch pile {
+            case .draw: throw Error.attemptedDrawPilePickUpFromDiscardPile
+            case .discardLeft: game.deck.leftDiscardPile.last
+            case .discardRight: game.deck.rightDiscardPile.last
+            }
 
-            try game.draw(pile: pile)
-                .forEach { game.update(cardID: $0.id, toLocation: .playerHand(game.currentPlayerUp)) }
+            card.map{ game.update(cardID: $0.id, toLocation: .playerHand(game.currentPlayerUp)) }
 
             game.set(phase: .waitingForPlay)
         }

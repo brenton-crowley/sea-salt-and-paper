@@ -101,6 +101,62 @@ struct WaitingForDrawCommandTests {
         // THEN
         #expect(game.deck.cards.first?.location == .pile(.discardRight))
     }
+
+    @Test("Success - Pick up from right discard pile.", arguments: [Game.Phase.waitingForDraw, .resolvingEffect(.pickUpDiscard)])
+    func successPickUpCardFromRightDiscardPile(gamePhase: Game.Phase) throws {
+        // GIVEN
+        let mockCards: [Card] = [
+            .duo(.crab, id: 0, location: .pile(.discardRight)),
+            .duo(.ship, id: 4, location: .pile(.discardRight)),
+            .duo(.crab, id: 1, location: .pile(.discardLeft)),
+            .duo(.crab, id: 2, location: .pile(.draw)),
+        ]
+        var game = Game(id: .mockGameID(), cards: mockCards, playersInGame: .two)
+        game.set(phase: gamePhase)
+        let action = Action<Game>.pickUpFromRightDiscardPile
+
+        // Can play action
+        #expect(action.rule().validate(on: game) == true)
+
+        // WHEN
+        try action.command().execute(on: &game)
+
+        // THEN
+        #expect(game.deck.cards.map(\.location) == [
+            .pile(.discardRight),
+            .playerHand(game.currentPlayerUp),
+            .pile(.discardLeft),
+            .pile(.draw),
+        ])
+    }
+
+    @Test("Success - Pick up from left discard pile.", arguments: [Game.Phase.waitingForDraw, .resolvingEffect(.pickUpDiscard)])
+    func successPickUpCardFromLeftDiscardPile(gamePhase: Game.Phase) throws {
+        // GIVEN
+        let mockCards: [Card] = [
+            .duo(.crab, id: 0, location: .pile(.discardLeft)),
+            .duo(.ship, id: 4, location: .pile(.discardLeft)),
+            .duo(.crab, id: 1, location: .pile(.discardRight)),
+            .duo(.crab, id: 2, location: .pile(.draw)),
+        ]
+        var game = Game(id: .mockGameID(), cards: mockCards, playersInGame: .two)
+        game.set(phase: gamePhase)
+        let action = Action<Game>.pickUpFromLeftDiscardPile
+
+        // Can play action
+        #expect(action.rule().validate(on: game) == true)
+
+        // WHEN
+        try action.command().execute(on: &game)
+
+        // THEN
+        #expect(game.deck.cards.map(\.location) == [
+            .pile(.discardLeft),
+            .playerHand(game.currentPlayerUp),
+            .pile(.discardRight),
+            .pile(.draw),
+        ])
+    }
 }
 
 extension WaitingForDrawCommandTests {
