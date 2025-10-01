@@ -25,7 +25,7 @@ extension GameEngine {
         guard actionIsPlayable(action) else { return } // Maybe throw here
 
         switch action {
-        case let .user(user): try user.action.command().execute(on: &self)
+        case let .user(user): try user.action.command().execute(on: &game)
         case let .system(system): try system.action.command().execute(on: &self)
         }
 
@@ -34,7 +34,7 @@ extension GameEngine {
 
     public func actionIsPlayable(_ action: GameEngine.Action) -> Bool {
         switch action {
-        case let .user(user): user.action.rule().validate(on: self)
+        case let .user(user): user.action.rule().validate(on: game)
         case let .system(system): system.action.rule().validate(on: self)
         }
     }

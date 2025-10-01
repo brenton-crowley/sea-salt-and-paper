@@ -44,7 +44,7 @@ extension GameEngine.Action {
 
 extension GameEngine.Action.User {
     /// Maps a public facing case from ``GameEngine/GameEngine/Action/User`` to an internal command that can be performed on the game.
-    var action: Action<GameEngine> {
+    var action: Action<Game> {
         switch self {
         case .drawPilePickUp: .pickUpFromDrawPile
         case .pickUpFromLeftDiscard: .pickUpFromLeftDiscardPile

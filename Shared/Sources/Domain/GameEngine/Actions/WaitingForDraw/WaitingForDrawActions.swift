@@ -2,7 +2,7 @@ import Foundation
 import Models
 
 // MARK: - Game Actions
-extension Action where S == GameEngine {
+extension Action where S == Game {
     static let pickUpFromDrawPile: Self = .init(
         rule: .ruleToPickUpFromDrawPile,
         command: .pickUpFromDrawPile
@@ -34,43 +34,43 @@ extension Action where S == GameEngine {
 }
 
 // MARK: - Game Validations
-extension ValidationRule where Input == GameEngine {
-    fileprivate static let ruleToPickUpFromDrawPile: Self = .init { gameEngine in
+extension ValidationRule where Input == Game {
+    fileprivate static let ruleToPickUpFromDrawPile: Self = .init { game in
         guard
-            gameEngine.game.phase(equals: .waitingForDraw),
-            !gameEngine.game.deck.drawPile.isEmpty
+            game.phase(equals: .waitingForDraw),
+            !game.deck.drawPile.isEmpty
         else { return false }
 
         return true
     }
 
-    fileprivate static let ruleToDrawFromLeftDiscardPile: Self = .init { gameEngine in
+    fileprivate static let ruleToDrawFromLeftDiscardPile: Self = .init { game in
         guard
-            gameEngine.game.phase(equals: .waitingForDraw),
-            !gameEngine.game.deck.leftDiscardPile.isEmpty
+            game.phase(equals: .waitingForDraw),
+            !game.deck.leftDiscardPile.isEmpty
         else { return false }
 
         return true
     }
 
-    static let ruleToDrawFromRightDiscardPile: Self = .init { gameEngine in
+    static let ruleToDrawFromRightDiscardPile: Self = .init { game in
         guard
-            gameEngine.game.phase(equals: .waitingForDraw),
-            !gameEngine.game.deck.rightDiscardPile.isEmpty
+            game.phase(equals: .waitingForDraw),
+            !game.deck.rightDiscardPile.isEmpty
         else { return false }
 
         return true
     }
 
     fileprivate static func ruleToDiscard(cardID: Card.ID, onto pile: Deck.Pile) -> Self {
-        .init { gameEngine in
+        .init { game in
             guard
-                gameEngine.game.phase(equals: .waitingForDiscard),
-                let card = gameEngine.game.deck.card(id: cardID),
-                card.location == .playerHand(gameEngine.game.currentPlayerUp)
+                game.phase(equals: .waitingForDiscard),
+                let card = game.deck.card(id: cardID),
+                card.location == .playerHand(game.currentPlayerUp)
             else { return false }
 
-            return ValidationRule<Deck>.canDiscard(to: pile).validate(on: gameEngine.game.deck)
+            return ValidationRule<Deck>.canDiscard(to: pile).validate(on: game.deck)
         }
     }
 }
@@ -95,34 +95,34 @@ extension ValidationRule where Input == Deck {
 }
 
 // MARK: - Game Commands
-extension Command where S == GameEngine {
+extension Command where S == Game {
     public enum Error: Swift.Error {
         case attemptedDrawPilePickUpFromDiscardPile
     }
 
-    fileprivate static let pickUpFromDrawPile: Self = .init { gameEngine in
+    fileprivate static let pickUpFromDrawPile: Self = .init { game in
         // Draw cards and update card locations
-        try gameEngine.game.draw(pile: .draw)
-            .forEach { gameEngine.game.update(cardID: $0.id, toLocation: .playerHand(gameEngine.game.currentPlayerUp)) }
+        try game.draw(pile: .draw)
+            .forEach { game.update(cardID: $0.id, toLocation: .playerHand(game.currentPlayerUp)) }
         // Change the phase
-        gameEngine.game.set(phase: .waitingForDiscard)
+        game.set(phase: .waitingForDiscard)
     }
 
     fileprivate static func pickUpFromDiscardPile(_ pile: Deck.Pile) -> Self {
-        .init { gameEngine in
+        .init { game in
             guard pile != .draw else { throw Error.attemptedDrawPilePickUpFromDiscardPile }
 
-            try gameEngine.game.draw(pile: pile)
-                .forEach { gameEngine.game.update(cardID: $0.id, toLocation: .playerHand(gameEngine.game.currentPlayerUp)) }
+            try game.draw(pile: pile)
+                .forEach { game.update(cardID: $0.id, toLocation: .playerHand(game.currentPlayerUp)) }
 
-            gameEngine.game.set(phase: .waitingForPlay)
+            game.set(phase: .waitingForPlay)
         }
     }
 
     fileprivate static func discardCard(id: Card.ID, to pile: Deck.Pile) -> Self {
         .init {
-            $0.game.update(cardID: id, toLocation: .pile(pile))
-            $0.game.set(phase: .waitingForPlay)
+            $0.update(cardID: id, toLocation: .pile(pile))
+            $0.set(phase: .waitingForPlay)
         }
     }
 }
