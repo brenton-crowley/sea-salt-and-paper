@@ -16,6 +16,11 @@ extension Action where S == Game {
             command: .stealCard(cardID: cardID)
         )
     }
+
+    static let endTurn: Self = .init(
+        rule: .ruleToEndTurn,
+        command: .endTurn
+    )
 }
 
 // MARK: - Game Validations
@@ -55,6 +60,11 @@ extension ValidationRule where Input == Game {
     fileprivate static let hasPairOfCrabs: Self = .init {
         ValidationRule<Deck>.hasAtLeastTwo(duo: .crab, inHandOfPlayer: $0.currentPlayerUp)
             .validate(on: $0.deck)
+    }
+
+    fileprivate static let ruleToEndTurn: Self  = .init {
+        guard $0.phase(equals: .waitingForPlay) else { return false }
+        return true
     }
 }
 
@@ -118,6 +128,8 @@ extension Command where S == Game {
             $0.set(phase: .waitingForPlay)
         }
     }
+
+    fileprivate static let endTurn: Self = .init { $0.set(phase: .endTurn) }
 }
 
 extension Game {

@@ -135,6 +135,24 @@ struct WaitingForPlayCommandTests {
             ]
         )
     }
+
+    @Test("Success - End Turn")
+    func successfullyEndTurn() throws {
+        // GIVEN
+        var game = Game.mock(id: .mockGameID())
+        game.set(phase: .waitingForPlay) // Must be in waiting for play state
+
+        let action = Action<Game>.endTurn
+
+        // Validate the action
+        #expect(action.rule().validate(on: game))
+
+        // WHEN
+        try action.command().execute(on: &game)
+
+        // THEN
+        #expect(game.phase == .endTurn)
+    }
 }
 
 extension Array where Element == Card {

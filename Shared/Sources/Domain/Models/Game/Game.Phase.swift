@@ -9,6 +9,14 @@ extension Game {
 
         public var id: Self { self }
     }
+
+    public enum EndRoundKind: Sendable, Hashable, Identifiable {
+        case stop
+        case lastChance
+
+        public var id: Self { self }
+    }
+
     public enum Phase: Sendable, Hashable, Identifiable {
         case waitingForStart
         case waitingForDraw
@@ -16,7 +24,7 @@ extension Game {
         case waitingForPlay
         case resolvingEffect(Game.Effect)
         case endTurn
-        case endRound
+        case endRound(Game.EndRoundKind)
 
         public var id: Self { self }
     }
