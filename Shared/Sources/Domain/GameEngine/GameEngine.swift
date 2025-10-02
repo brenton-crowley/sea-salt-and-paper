@@ -25,9 +25,12 @@ extension GameEngine {
         guard actionIsPlayable(action) else { return } // Maybe throw here
 
         switch action {
+        case .user(.endTurn): try Models.Action<GameEngine>.endTurn.execute(on: &self)
         case let .user(user): try user.action.command().execute(on: &game)
         case let .system(system): try system.action.command().execute(on: &self)
         }
+
+        sendEvent(.updatedGame(game))
     }
 
     public func actionIsPlayable(_ action: GameEngine.Action) -> Bool {
@@ -43,6 +46,10 @@ extension GameEngine {
     func saveGame() {
         dataProvider.saveGame(game)
     }
+
+    func sendEvent(_ event: GameEngine.Event) {
+        dataProvider.sendEvent(event)
+    }
 }
 
 // MARK: - DependencyModeKey Conformance
@@ -54,7 +61,9 @@ extension GameEngine: DependencyModeKey {
             deck: { .testMock },
             newGameID: { .init(0) },
             saveGame: { _ in },
-            shuffleCards: { $0 }
+            shuffleCards: { $0 },
+            streamOfGameEngineEvents: { .init { _ in } },
+            sendEvent: { _ in }
         )
     )
 
@@ -63,7 +72,9 @@ extension GameEngine: DependencyModeKey {
             deck: { [] },
             newGameID: { .init(0) },
             saveGame: { _ in },
-            shuffleCards: { $0 }
+            shuffleCards: { $0 },
+            streamOfGameEngineEvents: { .init { _ in } },
+            sendEvent: { _ in }
         )
     )
 }

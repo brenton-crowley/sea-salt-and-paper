@@ -7,16 +7,18 @@ public struct Card: Hashable, Sendable, Identifiable {
     public let kind: Card.Kind
     public let color: Card.Color
 
-    public var location: Card.Location = .pile(.draw)
+    public var location: Card.Location
 
     public init(
         id: Int, 
         kind: Card.Kind,
-        color: Card.Color
+        color: Card.Color,
+        location: Card.Location = .pile(.draw)
     ) {
         self.id = id
         self.kind = kind
         self.color = color
+        self.location = location
     }
 }
 
@@ -49,12 +51,14 @@ extension Card {
     public static func duo(
         _ duo: Duo,
         id: Int = 1,
-        color: Card.Color = .black
+        color: Card.Color = .black,
+        location: Card.Location = .pile(.draw)
     ) -> Self {
         .init(
             id: id,
             kind: .duo(duo),
-            color: color
+            color: color,
+            location: location
         )
     }
 

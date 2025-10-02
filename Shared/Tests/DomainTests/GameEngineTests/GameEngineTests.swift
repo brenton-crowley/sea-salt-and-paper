@@ -64,36 +64,3 @@ struct GameEngineTests {
     }
 }
 
-extension Int {
-    fileprivate static func number(of players: Player.InGameCount) -> Self {
-        switch players {
-        case .two: 2
-        case .three: 3
-        case .four: 4
-        }
-    }
-}
-
-extension GameEngine.DataProvider {
-    static var testValue: Self {
-        .init(
-            deck: { .gameEngineMockCards },
-            newGameID: { .mockGameID() },
-            saveGame: { _ in fatalError("Unimplemented") },
-            shuffleCards: { _ in fatalError("Unimplemented") }
-        )
-    }
-
-    static var testValueDefaults: Self {
-        .init(
-            deck: { .gameEngineMockCards },
-            newGameID: { .mockGameID() },
-            saveGame: { _ in },
-            shuffleCards: { $0 }
-        )
-    }
-}
-
-extension UUID {
-    fileprivate static func mockGameID(_ id: Int = 0) -> Self { UUID.init(id) }
-}
