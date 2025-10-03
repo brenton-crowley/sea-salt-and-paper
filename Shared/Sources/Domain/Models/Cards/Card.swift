@@ -86,11 +86,12 @@ extension Card {
         )
     }
 
-    public static func mermaid(id: Int = 1) -> Self {
+    public static func mermaid(id: Int = 1, location: Card.Location = .pile(.draw)) -> Self {
         .init(
             id: id,
             kind: .mermaid,
-            color: .white
+            color: .white,
+            location: location
         )
     }
 

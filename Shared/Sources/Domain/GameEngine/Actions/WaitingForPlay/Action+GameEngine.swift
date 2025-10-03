@@ -26,7 +26,7 @@ extension Command where S == GameEngine {
         // Run the system actions.
         // - Check mermaids
         guard !$0.game.currentPlayerHasFourMermaids else {
-            // -- If win, immediately end game
+            $0.game.set(phase: .endGame)
             return // End game
         }
 

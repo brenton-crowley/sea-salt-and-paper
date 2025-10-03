@@ -25,6 +25,7 @@ extension Game {
         case resolvingEffect(Game.Effect)
         case endTurn
         case endRound(Game.EndRoundKind)
+        case endGame
 
         public var id: Self { self }
     }
