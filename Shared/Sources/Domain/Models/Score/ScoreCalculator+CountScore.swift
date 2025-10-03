@@ -1,5 +1,4 @@
 import Foundation
-import Models
 
 extension ScoreCalculator {
     fileprivate enum DuoScore: Hashable {

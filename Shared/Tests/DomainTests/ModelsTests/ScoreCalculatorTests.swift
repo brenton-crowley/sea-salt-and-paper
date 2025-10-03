@@ -1,6 +1,4 @@
-import Scoring
 import Foundation
-import Models
 import Testing
 
 struct ScoringTests {

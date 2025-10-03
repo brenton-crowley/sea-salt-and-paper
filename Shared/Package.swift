@@ -251,7 +251,6 @@ private enum DomainLayer: String {
     static let modulePath: String = "/Domain"
 
     case models = "Models"
-    case scoring = "Scoring"
     case gameEngine = "GameEngine"
 }
 
@@ -260,7 +259,6 @@ extension DomainLayer: Modular {
     var product: Product {
         switch self {
         case .models,
-            .scoring,
             .gameEngine: .library(name: name, targets: [name])
         }
     }
@@ -287,7 +285,7 @@ extension DomainLayer: Modular {
             path: sourcePath
         )
 
-        case .scoring, .gameEngine: .target(
+        case .gameEngine: .target(
             name: name,
             dependencies: [
                 External.swiftConcurrencyExtras,
@@ -322,7 +320,7 @@ extension DomainLayer: Modular {
             path: testPath
         )
 
-        case .scoring, .gameEngine: .testTarget(
+        case .gameEngine: .testTarget(
             name: testName,
             dependencies: [
                 dependency,
