@@ -6,6 +6,14 @@ import Foundation
 import Testing
 
 struct SSEServiceTests {
+    private actor UpdateReceiver {
+        private(set) var receivedUpdates: [Data] = []
+
+        func addUpdate(_ data: Data) {
+            receivedUpdates.append(data)
+        }
+    }
+
     @Test(
         "Success - Calling eventUpdates returns a connection for that request",
         arguments: [
@@ -117,17 +125,17 @@ struct SSEServiceTests {
             await openConnectionExpectationTask.value
 
             // Set up some subscribers
-            var consumer1ReceivedUpdates: [Data] = []
+            let updateReceiver1 = UpdateReceiver()
             let consumer1Task = Task {
                 for await update in consumer1.stream {
-                    consumer1ReceivedUpdates.append(update)
+                    await updateReceiver1.addUpdate(update)
                 }
             }
 
-            var consumer2ReceivedUpdates: [Data] = []
+            let updateReceiver2 = UpdateReceiver()
             let consumer2Task = Task {
                 for await update in consumer2.stream {
-                    consumer2ReceivedUpdates.append(update)
+                    await updateReceiver2.addUpdate(update)
                 }
             }
 
@@ -144,8 +152,8 @@ struct SSEServiceTests {
             await consumer2Task.value
 
             // THEN - Expect each received updates to have same sequence as origin
-            #expect(consumer1ReceivedUpdates == mockUpdates)
-            #expect(consumer2ReceivedUpdates == mockUpdates)
+            await #expect(updateReceiver1.receivedUpdates == mockUpdates)
+            await #expect(updateReceiver2.receivedUpdates == mockUpdates)
         }
     }
 
@@ -163,10 +171,10 @@ struct SSEServiceTests {
             let subscriber = await testSubject.streamedData(forConnection: request)
 
             // Set up some subscribers
-            var subscriberReceivedUpdates: [Data] = []
+            let subscriberUpdates = UpdateReceiver()
             let subscriberTask = Task {
                 for await update in subscriber.stream {
-                    subscriberReceivedUpdates.append(update)
+                    await subscriberUpdates.addUpdate(update)
                 }
             }
 
@@ -183,7 +191,7 @@ struct SSEServiceTests {
             try await testSubject.openConnections[request.url]?.task.value
 
             // THEN - Connection closed and only received the one update
-            #expect(subscriberReceivedUpdates.isEmpty)
+            await #expect(subscriberUpdates.receivedUpdates.isEmpty)
             await #expect(testSubject.openConnections[request.url] == nil)
         }
     }

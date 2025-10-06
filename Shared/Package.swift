@@ -54,7 +54,7 @@ private enum External: String, CaseIterable {
 
     var package: Package.Dependency {
         return switch self {
-        case .swiftNavigation: .package(url: "https://github.com/pointfreeco/swift-navigation.git", exact: "2.3.0")
+        case .swiftNavigation: .package(url: "https://github.com/pointfreeco/swift-navigation.git", exact: "2.3.1")
         case .httpTypes: .package(url: "https://github.com/apple/swift-http-types.git", exact: "1.4.0")
         case .concurrencyExtras: .package(url: "https://github.com/pointfreeco/swift-concurrency-extras.git", from: "1.3.1")
         case .swiftCollections: .package(url: "https://github.com/apple/swift-collections.git", from: "1.2.0")
