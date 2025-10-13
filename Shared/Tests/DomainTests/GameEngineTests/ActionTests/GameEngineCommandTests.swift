@@ -17,13 +17,13 @@ struct GameEngineCommandTest {
         // Set up game
         try testSubject.performAction(.system(.createGame(players: .two)))
 
-        let action = Action<GameEngine>.endTurn
+        let action = Action<GameEngine>.endTurnNextPlayer
         testSubject.game.set(phase: .waitingForPlay)
         #expect(action.rule().validate(on: testSubject) == true)
         #expect(testSubject.game.currentPlayerHasFourMermaids == false)
 
         // WHEN
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN
         #expect(testSubject.game.currentPlayerUp == .two)
@@ -48,12 +48,12 @@ struct GameEngineCommandTest {
         // Set up game
         try testSubject.performAction(.system(.createGame(players: .two)))
 
-        let action = Action<GameEngine>.endTurn
+        let action = Action<GameEngine>.endTurnNextPlayer
         testSubject.game.set(phase: .waitingForPlay)
         #expect(action.rule().validate(on: testSubject) == true)
 
         // WHEN
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN
         #expect(testSubject.game.currentPlayerHasFourMermaids == true)

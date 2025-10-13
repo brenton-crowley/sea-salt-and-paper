@@ -17,7 +17,7 @@ extension Action where S == Game {
         )
     }
 
-    static let endTurn: Self = .init(
+    static let endTurnNextPlayer: Self = .init(
         rule: .ruleToEndTurn,
         command: .endTurn
     )

@@ -142,7 +142,7 @@ struct WaitingForPlayCommandTests {
         var game = Game.mock(id: .mockGameID())
         game.set(phase: .waitingForPlay) // Must be in waiting for play state
 
-        let action = Action<Game>.endTurn
+        let action = Action<Game>.endTurnNextPlayer
 
         // Validate the action
         #expect(action.rule().validate(on: game))

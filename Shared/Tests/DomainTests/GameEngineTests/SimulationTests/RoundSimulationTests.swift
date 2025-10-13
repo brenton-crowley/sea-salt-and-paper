@@ -35,6 +35,25 @@ struct RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForDraw)
 
         // Simulate turns
+        try simulateRoundEndingWithPlayer2(&testSubject)
+
+        // WHEN -
+        try testSubject.performAction(.user(.endTurn(.stop)))
+
+        let scoreCalc = ScoreCalculator()
+        let player1Cards = testSubject.game.deck.allCards(for: .one)
+        let player2Cards = testSubject.game.deck.allCards(for: .two)
+
+        let playerOneScore = scoreCalc.score(playerRound: player1Cards)
+        let playerTwoScore = scoreCalc.score(playerRound: player2Cards)
+
+        #expect(playerOneScore == 6)
+        #expect(playerTwoScore == 8)
+    }
+}
+
+extension RoundSimulationTests {
+    private func simulateRoundEndingWithPlayer2(_ testSubject: inout GameEngine) throws {
         try player1Turn1(&testSubject)
         try player2Turn1(&testSubject)
 
@@ -57,10 +76,11 @@ struct RoundSimulationTests {
         try player2Turn7(&testSubject)
 
         try player1Turn8(&testSubject)
-    }
-}
+        try player2Turn8_finalTurn(&testSubject)
 
-extension RoundSimulationTests {
+        #expect(testSubject.game.deck.allCards(for: .one).count == 7)
+        #expect(testSubject.game.deck.allCards(for: .two).count == 14)
+    }
     private func player1Turn1(_ testSubject: inout GameEngine) throws {
         // WHEN - 1up Draws two cards
         try testSubject.performAction(.user(.drawPilePickUp))
@@ -83,7 +103,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -110,7 +130,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -141,7 +161,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -171,7 +191,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -203,7 +223,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -257,7 +277,7 @@ extension RoundSimulationTests {
         }))
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -289,7 +309,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -355,7 +375,7 @@ extension RoundSimulationTests {
         )
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -387,7 +407,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -450,7 +470,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -482,7 +502,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -522,7 +542,7 @@ extension RoundSimulationTests {
         )
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -552,7 +572,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -583,7 +603,7 @@ extension RoundSimulationTests {
         )
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -618,11 +638,33 @@ extension RoundSimulationTests {
         // End turn
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn))
+        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
         #expect(testSubject.game.currentPlayerUp == .two)
+    }
+
+    private func player2Turn8_finalTurn(_ testSubject: inout GameEngine) throws {
+        // WHEN - Draw two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 2up's hand.
+        // Penguin purple
+        // Shell yellow
+        #expect(
+            [
+                Card.init(id: 32, kind: .collector(.penguin), color: .purple, location: .playerHand(.two)),
+                Card.init(id: 33, kind: .collector(.shell), color: .yellow, location: .playerHand(.two))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+        // WHEN - Discard purple penguin to right
+        try testSubject.performAction(.user(.discardToRightPile(32))) // ID of penguin
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 32) // ID of penguin
+        #expect(testSubject.game.phase == .waitingForPlay)
     }
 }
 
@@ -658,24 +700,14 @@ extension Array where Element == Card {
         .duo(.shark, id: 27, color: .purple), // Shark purple - 1up draw
         .duo(.ship, id: 28, color: .yellow),// Ship yellow - 1up draw
         .collector(.shell, id: 29, color: .black), // 2up fish draw
-
         .collector(.shell, id: 30, color: .darkBlue), // Shell dark blue
         .duo(.crab, id: 31, color: .darkBlue), // Crab dark blue
+
+        .collector(.penguin, id: 32, color: .purple), // Penguin purple - 2up draw
+        .collector(.shell, id: 33, color: .yellow), // Shell yellow - 2up draw
     ]
 }
 
-// 2up
-// 
-// Draw two cards
-// 
-// Penguin purple
-// Shell yellow
-// Discard purple penguin to right
-// 
-// End round with STOP
-// 
-// 
-// 
 // Count scores
 // 
 // 2up

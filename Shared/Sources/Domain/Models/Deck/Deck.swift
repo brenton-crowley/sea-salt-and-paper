@@ -24,6 +24,10 @@ extension Deck {
         cards.filter { $0.location == .playerHand(player) }
     }
 
+    public func allCards(for player: Player.Up) -> [Card] {
+        cards.filter { $0.location == .playerHand(player) || $0.location == .playerEffects(player) }
+    }
+
     public func topCard(pile: Pile) -> Card? {
         switch pile {
         case .draw: drawPile.first(where: { $0.location == .pile(.draw) })

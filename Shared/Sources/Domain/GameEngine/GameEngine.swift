@@ -25,7 +25,8 @@ extension GameEngine {
         guard actionIsPlayable(action) else { return } // Maybe throw here
 
         switch action {
-        case .user(.endTurn): try Models.Action<GameEngine>.endTurn.execute(on: &self)
+        case .user(.endTurn(.nextPlayer)): try Models.Action<GameEngine>.endTurnNextPlayer.execute(on: &self)
+        case .user(.endTurn(.stop)): try Models.Action<GameEngine>.endTurnStop.execute(on: &self)
         case let .user(user): try user.action.command().execute(on: &game)
         case let .system(system): try system.action.command().execute(on: &self)
         }
