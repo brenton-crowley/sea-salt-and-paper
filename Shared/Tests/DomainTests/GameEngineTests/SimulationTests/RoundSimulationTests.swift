@@ -48,6 +48,7 @@ struct RoundSimulationTests {
         try player2Turn4(&testSubject)
 
         try player1Turn5(&testSubject)
+        try player2Turn5(&testSubject)
     }
 }
 
@@ -384,6 +385,69 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForDraw)
         #expect(testSubject.game.currentPlayerUp == .two)
     }
+
+    private func player2Turn5(_ testSubject: inout GameEngine) throws {
+        // WHEN - 2up Draws two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 2up's hand.
+        // Swimmer yellow
+        // Ship black
+        #expect(
+            [
+                Card.init(id: 21, kind: .duo(.swimmer), color: .yellow, location: .playerHand(.two)),
+                Card.init(id: 22, kind: .duo(.ship), color: .black, location: .playerHand(.two))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+
+        // WHEN - Discard swimmer yellow to discard left.
+        try testSubject.performAction(.user(.discardToLeftPile(21))) // ID of crab
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 21) // ID of crab
+        #expect(testSubject.game.phase == .waitingForPlay)
+
+        // Play pair of ships
+        // WHEN - Play pair of ships
+        let blackShipID1 = 18
+        let blackShipID2 = 22
+        try testSubject.performAction(
+            .user(.playEffectWithCards(blackShipID1, blackShipID2))
+        )
+
+        // THEN - Waiting for draw
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .two)
+
+        // WHEN - 2up Draws two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 2up's hand.
+        // Shark dark blue
+        // Swimmer dark blue
+        #expect(
+            [
+                Card.init(id: 23, kind: .duo(.shark), color: .darkBlue, location: .playerHand(.two)),
+                Card.init(id: 24, kind: .duo(.swimmer), color: .darkBlue, location: .playerHand(.two))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+
+        // WHEN - Discard dark blue swimmer to right
+        try testSubject.performAction(.user(.discardToRightPile(24)))
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 24)
+        #expect(testSubject.game.phase == .waitingForPlay)
+
+        // WHEN - 2up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .one)
+    }
 }
 
 extension Array where Element == Card {
@@ -407,33 +471,18 @@ extension Array where Element == Card {
         .duo(.fish, id: 16, color: .lightGreen), // Fish light green - 2up draw
         .duo(.fish, id: 17, color: .darkBlue), // Fish dark blue - 2up draw
         .duo(.ship, id: 18, color: .black), // Black ship - 2up fish pick up
-
         .duo(.fish, id: 19, color: .yellow), // Fish yellow - 1up draw
-        .collector(.sailor, id: 20, color: .lightPink), // Sailor pink
+        .collector(.sailor, id: 20, color: .lightPink), // Sailor pink - 1up draw
+
+        .duo(.swimmer, id: 21, color: .yellow), // Swimmer yellow - 2up draw
+        .duo(.ship, id: 22, color: .black), // Ship black - 2up draw
+
+        .duo(.shark, id: 23, color: .darkBlue), // Shark dark blue - 2up draw (ship turn)
+        .duo(.swimmer, id: 24, color: .darkBlue), // Swimmer dark blue - 2up draw (ship turn)
     ]
 }
 
 
-// 2up
-// 
-// Draw two cards
-// 
-// Swimmer yellow
-// Ship black
-// Discard swimmer yellow to discard left.
-// 
-// Play pair of ships
-// 
-// Draw two cards
-// 
-// Shark dark blue
-// Swimmer dark blue
-// Discard dark blue swimmer to right
-// 
-// End turn
-// 
-// 
-// 
 // 1up
 // 
 // Draw two cards
