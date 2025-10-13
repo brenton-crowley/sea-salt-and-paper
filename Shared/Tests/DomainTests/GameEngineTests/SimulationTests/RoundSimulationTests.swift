@@ -51,6 +51,7 @@ struct RoundSimulationTests {
         try player2Turn5(&testSubject)
 
         try player1Turn6(&testSubject)
+        try player2Turn6(&testSubject)
     }
 }
 
@@ -482,6 +483,46 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForDraw)
         #expect(testSubject.game.currentPlayerUp == .two)
     }
+
+    private func player2Turn6(_ testSubject: inout GameEngine) throws {
+        // WHEN - Pick up swimmer yellow from left discard
+        try testSubject.performAction(.user(.pickUpFromLeftDiscard))
+
+        // THEN - 2up should possess yellow swimmer
+        let yellowSwimmerID = 21
+        #expect(testSubject.game.phase == .waitingForPlay)
+        #expect(
+            [Card.init(id: yellowSwimmerID, kind: .duo(.swimmer), color: .yellow, location: .playerHand(.two)),]
+                .allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+
+        // WHEN - Play steal card
+        let darkBlueSharkID = 23
+        try testSubject.performAction(
+            .user(.playEffectWithCards(darkBlueSharkID, yellowSwimmerID))
+        )
+
+        // THEN - Resolving effects
+        #expect(testSubject.game.phase == .resolvingEffect(.stealCard))
+
+        // WHEN - Stole yellow fish from 1up
+        let yellowFishID = 19
+        try testSubject.performAction(.user(.stealCard(yellowFishID)))
+
+        // THEN - Yellow fish should be in 2up hand
+        #expect(testSubject.game.phase == .waitingForPlay)
+        #expect(
+            [Card.init(id: yellowFishID, kind: .duo(.fish), color: .yellow, location: .playerHand(.two)),]
+                .allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+
+        // WHEN - 2up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .one)
+    }
 }
 
 extension Array where Element == Card {
@@ -511,22 +552,11 @@ extension Array where Element == Card {
         .duo(.ship, id: 22, color: .black), // Ship black - 2up draw
         .duo(.shark, id: 23, color: .darkBlue), // Shark dark blue - 2up draw (ship turn)
         .duo(.swimmer, id: 24, color: .darkBlue), // Swimmer dark blue - 2up draw (ship turn)
-
         .duo(.fish, id: 25, color: .black), // Fish black - 1up draw
         .mermaid(id: 26), // Mermaid - 1up draw
     ]
 }
 
-// 2up
-// 
-// Pick up swimmer yellow from left discard
-// 
-// Play steal card -> Stole yellow fish from 1up.
-// 
-// End turn
-// 
-// 
-// 
 // 1up
 // 
 // Draw two cards
