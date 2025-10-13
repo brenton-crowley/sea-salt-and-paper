@@ -49,6 +49,8 @@ struct RoundSimulationTests {
 
         try player1Turn5(&testSubject)
         try player2Turn5(&testSubject)
+
+        try player1Turn6(&testSubject)
     }
 }
 
@@ -448,6 +450,38 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForDraw)
         #expect(testSubject.game.currentPlayerUp == .one)
     }
+
+    private func player1Turn6(_ testSubject: inout GameEngine) throws {
+        // 1up
+        //
+        // WHEN - Draw two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 1up's hand.
+        // Fish black
+        // Mermaid
+        #expect(
+            [
+                Card.init(id: 25, kind: .duo(.fish), color: .black, location: .playerHand(.one)),
+                Card.init(id: 26, kind: .mermaid, color: .white, location: .playerHand(.one))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .one).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+        // WHEN - Discard black fish to right
+        try testSubject.performAction(.user(.discardToRightPile(25))) // ID of fish
+
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 25) // ID of fish
+        #expect(testSubject.game.phase == .waitingForPlay)
+
+        // WHEN - 1up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .two)
+    }
 }
 
 extension Array where Element == Card {
@@ -473,28 +507,16 @@ extension Array where Element == Card {
         .duo(.ship, id: 18, color: .black), // Black ship - 2up fish pick up
         .duo(.fish, id: 19, color: .yellow), // Fish yellow - 1up draw
         .collector(.sailor, id: 20, color: .lightPink), // Sailor pink - 1up draw
-
         .duo(.swimmer, id: 21, color: .yellow), // Swimmer yellow - 2up draw
         .duo(.ship, id: 22, color: .black), // Ship black - 2up draw
-
         .duo(.shark, id: 23, color: .darkBlue), // Shark dark blue - 2up draw (ship turn)
         .duo(.swimmer, id: 24, color: .darkBlue), // Swimmer dark blue - 2up draw (ship turn)
+
+        .duo(.fish, id: 25, color: .black), // Fish black - 1up draw
+        .mermaid(id: 26), // Mermaid - 1up draw
     ]
 }
 
-
-// 1up
-// 
-// Draw two cards
-// 
-// Fish black
-// Mermaid
-// Discard black fish to right
-// 
-// end turn
-// 
-// 
-// 
 // 2up
 // 
 // Pick up swimmer yellow from left discard
