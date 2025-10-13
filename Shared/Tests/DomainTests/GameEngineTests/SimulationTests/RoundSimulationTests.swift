@@ -52,6 +52,11 @@ struct RoundSimulationTests {
 
         try player1Turn6(&testSubject)
         try player2Turn6(&testSubject)
+
+        try player1Turn7(&testSubject)
+        try player2Turn7(&testSubject)
+
+        try player1Turn8(&testSubject)
     }
 }
 
@@ -523,6 +528,102 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForDraw)
         #expect(testSubject.game.currentPlayerUp == .one)
     }
+
+    private func player1Turn7(_ testSubject: inout GameEngine) throws {
+        // WHEN - Draw two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 1up's hand.
+        // Shark purple
+        // Ship yellow
+        #expect(
+            [
+                Card.init(id: 27, kind: .duo(.shark), color: .purple, location: .playerHand(.one)),
+                Card.init(id: 28, kind: .duo(.ship), color: .yellow, location: .playerHand(.one))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .one).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+        // WHEN - Discard shark to left discard
+        try testSubject.performAction(.user(.discardToLeftPile(27))) // ID of shark
+
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 27) // ID of shark
+        #expect(testSubject.game.phase == .waitingForPlay)
+
+        // WHEN - 1up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .two)
+    }
+
+    private func player2Turn7(_ testSubject: inout GameEngine) throws {
+        // WHEN - Pick up black fish from right discard
+        try testSubject.performAction(.user(.pickUpFromRightDiscard))
+
+        // THEN - 2up should possess black fish
+        let blackFishID = 25
+        #expect(testSubject.game.phase == .waitingForPlay)
+        #expect(
+            [Card.init(id: blackFishID, kind: .duo(.fish), color: .black, location: .playerHand(.two)),]
+                .allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+
+        // WHEN - Play pair of fish
+        let yellowFishID = 19
+        try testSubject.performAction(.user(.playEffectWithCards(yellowFishID, blackFishID)))
+
+        // THEN - Pick up black shell from draw pile
+        #expect(testSubject.game.phase == .waitingForPlay)
+        #expect(
+            [Card.init(id: 29, kind: .collector(.shell), color: .black, location: .playerHand(.two)),]
+                .allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+
+        // WHEN - 2up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .one)
+    }
+
+    private func player1Turn8(_ testSubject: inout GameEngine) throws {
+        // 1up
+        //
+        // Draw two cards
+
+        // WHEN - Draw two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 1up's hand.
+        // Shell dark blue
+        // Crab dark blue
+        #expect(
+            [
+                Card.init(id: 30, kind: .collector(.shell), color: .darkBlue, location: .playerHand(.one)),
+                Card.init(id: 31, kind: .duo(.crab), color: .darkBlue, location: .playerHand(.one))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .one).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+        // WHEN - Discard crab dark blue to left discard
+        try testSubject.performAction(.user(.discardToLeftPile(31))) // ID of crab
+
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 31) // ID of crab
+        #expect(testSubject.game.phase == .waitingForPlay)
+        // End turn
+
+        // WHEN - 1up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .two)
+    }
 }
 
 extension Array where Element == Card {
@@ -554,46 +655,15 @@ extension Array where Element == Card {
         .duo(.swimmer, id: 24, color: .darkBlue), // Swimmer dark blue - 2up draw (ship turn)
         .duo(.fish, id: 25, color: .black), // Fish black - 1up draw
         .mermaid(id: 26), // Mermaid - 1up draw
+        .duo(.shark, id: 27, color: .purple), // Shark purple - 1up draw
+        .duo(.ship, id: 28, color: .yellow),// Ship yellow - 1up draw
+        .collector(.shell, id: 29, color: .black), // 2up fish draw
+
+        .collector(.shell, id: 30, color: .darkBlue), // Shell dark blue
+        .duo(.crab, id: 31, color: .darkBlue), // Crab dark blue
     ]
 }
 
-// 1up
-// 
-// Draw two cards
-// 
-// Shark purple
-// Ship yellow
-// Discard shark to left discard
-// 
-// end turn
-// 
-// 
-// 
-// 2up
-// 
-// Pick up black fish from right discard
-// 
-// Play pair of fish
-// 
-// PIck upp one card from draw pile
-// 
-// Shell black
-// End turn
-// 
-// 
-// 
-// 1up
-// 
-// Draw two cards
-// 
-// Shell dark blue
-// Crab dark blue
-// Discard crab dark bllue to left discard
-// 
-// End turn
-// 
-// 
-// 
 // 2up
 // 
 // Draw two cards
