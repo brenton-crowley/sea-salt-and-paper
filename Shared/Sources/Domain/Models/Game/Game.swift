@@ -45,6 +45,10 @@ extension Game {
     public mutating func update(cardID: Card.ID, toLocation location: Card.Location) {
         deck.update(cardID: cardID, toLocation: location)
     }
+
+    public func cardsInHand(ofPlayer player: Player.Up) -> [Card] {
+        deck.cardsInHand(for: player)
+    }
 }
 
 // MARK: - Private API
