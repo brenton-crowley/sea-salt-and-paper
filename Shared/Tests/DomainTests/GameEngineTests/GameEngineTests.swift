@@ -20,15 +20,21 @@ struct GameEngineTests {
             dataProvider.shuffleCards = { $0 }
             dataProvider.sendEvent = { _ in confirmation() }
             var testSubject = GameEngine(dataProvider: dataProvider)
+            #expect(testSubject.game.phase == .waitingForStart)
 
             // WHEN
             try testSubject.performAction(.system(.createGame(players: players)))
 
             // THEN
+            // Firs two cards should be in discard pile.
+            var expectedCards = mockCards
+            expectedCards[0].location = .pile(.discardLeft)
+            expectedCards[1].location = .pile(.discardRight)
+
             #expect(testSubject.game.id == .mockGameID())
-            #expect(testSubject.game.deck.cards == OrderedSet(mockCards))
+            #expect(testSubject.game.deck.cards == OrderedSet(expectedCards))
             #expect(testSubject.game.players.count == .number(of: players))
-            #expect(testSubject.game.phase == .waitingForStart)
+            #expect(testSubject.game.phase == .waitingForDraw)
             #expect(testSubject.game.currentPlayerUp == .one)
             #expect(testSubject.game.deck.cards.count == mockCards.count)
         }

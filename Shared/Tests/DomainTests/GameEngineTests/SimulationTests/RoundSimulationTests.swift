@@ -40,6 +40,7 @@ struct RoundSimulationTests {
         // WHEN -
         try testSubject.performAction(.user(.endTurn(.stop)))
 
+
         let scoreCalc = ScoreCalculator()
         let player1Cards = testSubject.game.deck.allCards(for: .one)
         let player2Cards = testSubject.game.deck.allCards(for: .two)

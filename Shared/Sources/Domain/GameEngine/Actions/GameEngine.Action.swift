@@ -13,13 +13,6 @@ extension GameEngine {
 }
 
 extension GameEngine.Action {
-    public enum EndTurn: Sendable, Hashable, Identifiable {
-        public var id: Self { self }
-
-        case nextPlayer
-        case stop
-        case lastChance
-    }
     public enum User: Sendable, Hashable, Identifiable {
         case drawPilePickUp
         case pickUpFromLeftDiscard
@@ -28,7 +21,7 @@ extension GameEngine.Action {
         case discardToLeftPile(Card.ID)
         case playEffectWithCards(Card.ID, Card.ID)
         case stealCard(Card.ID)
-        case endTurn(EndTurn)
+        case endTurn(Game.EndTurnKind)
 
         public var id: Self { self }
     }

@@ -165,14 +165,14 @@ extension WaitingForDrawCommandTests {
         switch playerUp {
         case .one: break
         case .two:
-            game.nextPlayer()
+            game.setNextPlayerUp()
         case .three:
-            game.nextPlayer()
-            game.nextPlayer() // Get to player 3
+            game.setNextPlayerUp()
+            game.setNextPlayerUp() // Get to player 3
         case .four:
-            game.nextPlayer()
-            game.nextPlayer()
-            game.nextPlayer() // Get to player 4
+            game.setNextPlayerUp()
+            game.setNextPlayerUp()
+            game.setNextPlayerUp() // Get to player 4
         }
 
         return game

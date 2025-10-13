@@ -151,7 +151,7 @@ struct WaitingForPlayCommandTests {
         try action.command().execute(on: &game)
 
         // THEN
-        #expect(game.phase == .endTurn)
+        #expect(game.phase == .waitingForDraw)
     }
 }
 
