@@ -249,6 +249,38 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForDraw)
         #expect(testSubject.game.currentPlayerUp == .one)
     }
+
+    private func player1Turn4(_ testSubject: inout GameEngine) throws {
+        // WHEN - 1up Draws two cards
+        // Shark light blue
+        // Penguin pink
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 1up's hand.
+        #expect(
+            [
+                Card.init(id: 14, kind: .duo(.shark), color: .lightBlue, location: .playerHand(.one)),
+                Card.init(id: 15, kind: .collector(.penguin), color: .lightPink, location: .playerHand(.one))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .one).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+
+
+        // WHEN - 1up discards shark light blue to left
+        try testSubject.performAction(.user(.discardToRightPile(14))) // ID of shark
+
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 14) // ID of Shark
+        #expect(testSubject.game.phase == .waitingForPlay)
+
+        // WHEN - 1up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .two)
+    }
 }
 
 extension Array where Element == Card {
@@ -265,24 +297,13 @@ extension Array where Element == Card {
         .duo(.ship, id: 9, color: .lightBlue), // Ship light blue - 2up draw
         .duo(.shark, id: 10, color: .lightGreen), // Shark light green - 1up draw
         .multiplier(.penguin, id: 11, color: .lightGreen), // Multiplier penguin light green. - 1up draw
-
         .duo(.crab, id: 12, color: .black), // Crab black - 2up draw
-        .duo(.ship, id: 13, color: .darkBlue), // Ship dark blue
+        .duo(.ship, id: 13, color: .darkBlue), // Ship dark blue - 2up draw
+        .duo(.shark, id: 14, color: .lightBlue), // Shark light blue - 1up draw
+        .collector(.penguin, id: 15, color: .lightPink), // Penguin pink - 1up draw
     ]
 }
 
-// 1up
-// 
-// Draw two cards
-// 
-// Shark light blue
-// Penguin pink
-// Discard shark light blue to left
-// 
-// end turn
-// 
-// 
-// 
 // 2up
 // 
 // Draw two cards
