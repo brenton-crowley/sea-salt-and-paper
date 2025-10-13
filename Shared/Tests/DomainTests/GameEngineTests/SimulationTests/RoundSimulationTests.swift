@@ -40,6 +40,8 @@ struct RoundSimulationTests {
 
         try player1Turn2(&testSubject)
         try player2Turn2(&testSubject)
+
+        try player1Turn3(&testSubject)
     }
 }
 
@@ -160,6 +162,38 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForDraw)
         #expect(testSubject.game.currentPlayerUp == .one)
     }
+
+    private func player1Turn3(_ testSubject: inout GameEngine) throws {
+        // WHEN - 1up Draws two cards
+        // Shark light green
+        // Multiplier penguin light green.
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 1up's hand.
+        #expect(
+            [
+                Card.init(id: 10, kind: .duo(.shark), color: .lightGreen, location: .playerHand(.one)),
+                Card.init(id: 11, kind: .multiplier(.penguin), color: .lightGreen, location: .playerHand(.one))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .one).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+
+        // WHEN - 1up discards
+        // Discard shark light green to left.
+        try testSubject.performAction(.user(.discardToRightPile(10))) // ID of shark
+
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 10) // ID of Shark
+        #expect(testSubject.game.phase == .waitingForPlay)
+
+        // WHEN - 1up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .two)
+    }
 }
 
 extension Array where Element == Card {
@@ -174,19 +208,12 @@ extension Array where Element == Card {
         .duo(.ship, id: 7, color: .yellow), // Ship yellow (1up draw)
         .duo(.fish, id: 8, color: .darkBlue), // Fish dark blue - 2up draw
         .duo(.ship, id: 9, color: .lightBlue), // Ship light blue - 2up draw
+
+        .duo(.shark, id: 10, color: .lightGreen), // Shark light green - 1up draw
+        .multiplier(.penguin, id: 11, color: .lightGreen)// Multiplier penguin light green. - 1up draw
     ]
 }
 
-// 1up
-// 
-// Draw two cards
-// 
-// Shark light green
-// Multiplier penguin light green.
-// Discard shark light green to left.
-// 
-// 
-// 
 // 2up
 // 
 // Draw two cards
