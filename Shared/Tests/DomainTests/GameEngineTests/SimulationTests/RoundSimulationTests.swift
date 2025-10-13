@@ -43,6 +43,9 @@ struct RoundSimulationTests {
 
         try player1Turn3(&testSubject)
         try player2Turn3(&testSubject)
+
+        try player1Turn4(&testSubject)
+        try player2Turn4(&testSubject)
     }
 }
 
@@ -182,10 +185,10 @@ extension RoundSimulationTests {
 
         // WHEN - 1up discards
         // Discard shark light green to left.
-        try testSubject.performAction(.user(.discardToRightPile(10))) // ID of shark
+        try testSubject.performAction(.user(.discardToLeftPile(10))) // ID of shark
 
         // THEN -
-        #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 10) // ID of Shark
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 10) // ID of Shark
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
@@ -211,10 +214,10 @@ extension RoundSimulationTests {
         )
         #expect(testSubject.game.phase == .waitingForDiscard)
 
-        // WHEN - 2up discards black crab
-        try testSubject.performAction(.user(.discardToRightPile(12))) // ID of crab
+        // WHEN - 2up discards black crab to left
+        try testSubject.performAction(.user(.discardToLeftPile(12))) // ID of crab
         // THEN -
-        #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 12) // ID of crab
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 12) // ID of crab
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - Play pair of ships
@@ -268,10 +271,10 @@ extension RoundSimulationTests {
 
 
         // WHEN - 1up discards shark light blue to left
-        try testSubject.performAction(.user(.discardToRightPile(14))) // ID of shark
+        try testSubject.performAction(.user(.discardToLeftPile(14))) // ID of shark
 
         // THEN -
-        #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 14) // ID of Shark
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 14) // ID of Shark
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
@@ -280,6 +283,72 @@ extension RoundSimulationTests {
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
         #expect(testSubject.game.currentPlayerUp == .two)
+    }
+
+    private func player2Turn4(_ testSubject: inout GameEngine) throws {
+        // WHEN - 2up Draws two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 2up's hand.
+        // Fish light green
+        // Fish dark blue
+        #expect(
+            [
+                Card.init(id: 16, kind: .duo(.fish), color: .lightGreen, location: .playerHand(.two)),
+                Card.init(id: 17, kind: .duo(.fish), color: .darkBlue, location: .playerHand(.two))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+        // WHEN -  Discard light green fish to left
+        try testSubject.performAction(.user(.discardToLeftPile(16))) // ID of crab
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 16) // ID of crab
+        #expect(testSubject.game.phase == .waitingForPlay)
+
+        // WHEN - Play pair of crabs
+        let lightBlueCrabID = 4
+        let blackCrabID = 12
+        try testSubject.performAction(
+            .user(.playEffectWithCards(lightBlueCrabID, blackCrabID))
+        )
+
+        // THEN - Waiting for draw
+        #expect(testSubject.game.phase == .resolvingEffect(.pickUpDiscard))
+        #expect(testSubject.game.currentPlayerUp == .two)
+        #expect(Action<Game>.pickUpFromLeftDiscardPile.rule().validate(on: testSubject.game) == true)
+
+        // WHEN - Pick up light green fish
+        try testSubject.performAction(.user(.pickUpFromLeftDiscard))
+
+        // THEN - Light green fish is in 2up hand
+        #expect(
+            [Card.init(id: 16, kind: .duo(.fish), color: .lightGreen, location: .playerHand(.two)),]
+                .allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForPlay)
+
+        // WHEN - Play pair of fish picks up black ship
+        let lightGreenFishID = 16
+        let darkBlueFishID = 17
+        try testSubject.performAction(
+            .user(.playEffectWithCards(lightGreenFishID, darkBlueFishID))
+        )
+
+        // THEN - Waiting for play and black ship in player hand
+        #expect(testSubject.game.phase == .waitingForPlay)
+        #expect(testSubject.game.currentPlayerUp == .two)
+        #expect(
+            [Card.init(id: 18, kind: .duo(.ship), color: .black, location: .playerHand(.two)),]
+                .allSatisfy(testSubject.game.cardsInHand(ofPlayer: .two).contains(_:))
+        )
+
+        // WHEN - 2up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .one)
     }
 }
 
@@ -301,30 +370,14 @@ extension Array where Element == Card {
         .duo(.ship, id: 13, color: .darkBlue), // Ship dark blue - 2up draw
         .duo(.shark, id: 14, color: .lightBlue), // Shark light blue - 1up draw
         .collector(.penguin, id: 15, color: .lightPink), // Penguin pink - 1up draw
+        .duo(.fish, id: 16, color: .lightGreen), // Fish light green - 2up draw
+        .duo(.fish, id: 17, color: .darkBlue), // Fish dark blue - 2up draw
+
+        .duo(.ship, id: 18, color: .black), // Black ship - 2up fish pick up
     ]
 }
 
-// 2up
-// 
-// Draw two cards
-// 
-// Fish light green
-// Fish dark blue
-// Discard light green fish to left
-// 
-// Play pair of crabs
-// 
-// Pick up light green fish
-// 
-// Play pair of fish
-// 
-// Draw one card
-// 
-// Ship black
-// End turn
-// 
-// 
-// 
+
 // 1up
 // 
 // Draw two cards
