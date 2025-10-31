@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Swift Tests
+    name: Swift Package Tests
     runs-on: macos-latest
 
     steps:
@@ -20,5 +20,12 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Build and test
+      # Run tests in Shared
+      - name: Run tests in Shared package
         run: swift test --parallel
+        working-directory: Shared
+
+      # Run tests in Features
+      - name: Run tests in Features package
+        run: swift test --parallel
+        working-directory: Features
