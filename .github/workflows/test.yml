@@ -1,14 +1,12 @@
-name: Run Unit Tests
+name: Run iOS Unit Tests
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   test:
-    name: Swift Package Tests
+    name: iOS Swift Package Tests
     runs-on: macos-latest
 
     steps:
@@ -20,12 +18,23 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      # Run tests in Shared
-      - name: Run tests in Shared package
-        run: swift test --parallel
+      - name: Install xcpretty
+        run: gem install xcpretty
+
+      # Run iOS tests for Shared
+      - name: Test Shared package (iOS)
+        run: |
+          xcodebuild \
+            -scheme Shared \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            clean test | xcpretty
         working-directory: Shared
 
-      # Run tests in Features
-      - name: Run tests in Features package
-        run: swift test --parallel
+      # Run iOS tests for Features
+      - name: Test Features package (iOS)
+        run: |
+          xcodebuild \
+            -scheme Features \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            clean test | xcpretty
         working-directory: Features
