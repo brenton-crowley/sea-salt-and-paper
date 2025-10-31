@@ -18,10 +18,20 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      # 🧩 Cache SwiftPM dependencies
+      - name: Cache SwiftPM dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Caches/org.swift.swiftpm
+          key: ${{ runner.os }}-swiftpm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-
+
       - name: Install xcpretty
         run: gem install xcpretty
 
-      # Run iOS tests for Shared
       - name: Test Shared package (iOS)
         run: |
           xcodebuild \
@@ -30,7 +40,6 @@ jobs:
             clean test | xcpretty
         working-directory: Shared
 
-      # Run iOS tests for Features
       - name: Test Features package (iOS)
         run: |
           xcodebuild \
