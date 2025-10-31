@@ -1,0 +1,49 @@
+name: Run iOS Unit Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: iOS Swift Package Tests
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      # 🧩 Cache SwiftPM dependencies
+      - name: Cache SwiftPM dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Caches/org.swift.swiftpm
+          key: ${{ runner.os }}-swiftpm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-
+
+      - name: Install xcpretty
+        run: gem install xcpretty
+
+      - name: Test Shared package (iOS)
+        run: |
+          xcodebuild \
+            -scheme Shared \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            clean test | xcpretty
+        working-directory: Shared
+
+      - name: Test Features package (iOS)
+        run: |
+          xcodebuild \
+            -scheme Features \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            clean test | xcpretty
+        working-directory: Features
