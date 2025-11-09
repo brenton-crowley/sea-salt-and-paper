@@ -11,23 +11,30 @@ struct GameEngineTests {
         arguments: [Player.InGameCount.two, .three, .four]
     )
     func successNewGame(players: Player.InGameCount) async throws {
-        try await confirmation { confirmation in
+        try await confirmation(expectedCount: 2) { confirmation in
             // GIVEN
             let mockCards = Array<Card>.gameEngineMockCards
             var dataProvider = GameEngine.DataProvider.testValue
             dataProvider.deck = { mockCards }
             dataProvider.saveGame = { _ in confirmation() }
             dataProvider.shuffleCards = { $0 }
+            dataProvider.sendEvent = { _ in confirmation() }
             var testSubject = GameEngine(dataProvider: dataProvider)
+            #expect(testSubject.game.phase == .waitingForStart)
 
             // WHEN
             try testSubject.performAction(.system(.createGame(players: players)))
 
             // THEN
+            // Firs two cards should be in discard pile.
+            var expectedCards = mockCards
+            expectedCards[0].location = .pile(.discardLeft)
+            expectedCards[1].location = .pile(.discardRight)
+
             #expect(testSubject.game.id == .mockGameID())
-            #expect(testSubject.game.deck.cards == OrderedSet(mockCards))
+            #expect(testSubject.game.deck.cards == OrderedSet(expectedCards))
             #expect(testSubject.game.players.count == .number(of: players))
-            #expect(testSubject.game.phase == .waitingForStart)
+            #expect(testSubject.game.phase == .waitingForDraw)
             #expect(testSubject.game.currentPlayerUp == .one)
             #expect(testSubject.game.deck.cards.count == mockCards.count)
         }
@@ -35,10 +42,11 @@ struct GameEngineTests {
 
     @Test("One Round - Two Players")
     func oneRound() async throws {
-        try await confirmation { confirmation in
+        try await confirmation(expectedCount: 2) { confirmation in
             // GIVEN
             var dataProvider = GameEngine.DataProvider.testValue
             dataProvider.saveGame = { _ in confirmation() }
+            dataProvider.sendEvent = { _ in confirmation() }
             dataProvider.shuffleCards = { $0 }
             dataProvider.deck = {
                 [

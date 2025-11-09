@@ -21,7 +21,7 @@ extension GameEngine.Action {
         case discardToLeftPile(Card.ID)
         case playEffectWithCards(Card.ID, Card.ID)
         case stealCard(Card.ID)
-        case endTurn
+        case endTurn(Game.EndTurnKind)
 
         public var id: Self { self }
     }
@@ -54,7 +54,9 @@ extension GameEngine.Action.User {
         case let .discardToLeftPile(cardID): .discardToLeftPile(cardID: cardID)
         case let .playEffectWithCards(card1, card2): .playEffect(cards: (card1, card2))
         case let .stealCard(cardID): .stealCard(cardID: cardID)
-        case .endTurn: .endTurn
+        case .endTurn(.nextPlayer): .endTurnNextPlayer
+        case .endTurn(.stop): .endTurnNextPlayer // TODO: Update
+        case .endTurn(.lastChance): .endTurnNextPlayer // TODO: Update
         }
     }
 }

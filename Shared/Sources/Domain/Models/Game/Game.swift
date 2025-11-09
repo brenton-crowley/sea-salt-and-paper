@@ -9,6 +9,7 @@ public struct Game: Sendable, Hashable, Identifiable {
     internal(set) public var deck: Deck = .init()
     internal(set) public var phase: Game.Phase = .waitingForStart
     internal(set) public var currentPlayerUp: Player.Up = .one
+    internal(set) public var rounds: [Game.Round] = []
 
     public init(id: UUID, cards: [Card], playersInGame: Player.InGameCount) {
         self.id = id
@@ -21,17 +22,28 @@ public struct Game: Sendable, Hashable, Identifiable {
 
 extension Game {
     public var currentPlayer: Player? { players[currentPlayerUp] }
+
+    public var currentPlayerHasFourMermaids: Bool {
+        deck.cards
+            .filter { $0.location == .playerHand(currentPlayerUp) }
+            .filter { $0.kind == .mermaid }
+            .count == 4
+    }
 }
 
 // MARK: - Public Methods
 
 extension Game {
+    public var nextPlayerUp: Player.Up {
+        currentPlayerUp.next(playersInGame: players.values.count.playersInGameCount)
+    }
+
     public func phase(equals phase: Game.Phase) -> Bool {
         self.phase == phase
     }
 
-    public mutating func nextPlayer() {
-        currentPlayerUp = currentPlayerUp.next(playersInGame: players.values.count.playersInGameCount)
+    public mutating func setNextPlayerUp() {
+        currentPlayerUp = nextPlayerUp
     }
 
     public mutating func set(phase: Game.Phase) {
@@ -44,6 +56,10 @@ extension Game {
 
     public mutating func update(cardID: Card.ID, toLocation location: Card.Location) {
         deck.update(cardID: cardID, toLocation: location)
+    }
+
+    public func cardsInHand(ofPlayer player: Player.Up) -> [Card] {
+        deck.cardsInHand(for: player)
     }
 }
 

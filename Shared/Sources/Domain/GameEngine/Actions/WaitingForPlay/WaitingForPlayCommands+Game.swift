@@ -17,9 +17,9 @@ extension Action where S == Game {
         )
     }
 
-    static let endTurn: Self = .init(
+    static let endTurnNextPlayer: Self = .init(
         rule: .ruleToEndTurn,
-        command: .endTurn
+        command: .endTurnNextPlayer
     )
 }
 
@@ -129,7 +129,30 @@ extension Command where S == Game {
         }
     }
 
-    fileprivate static let endTurn: Self = .init { $0.set(phase: .endTurn) }
+    fileprivate static let endTurnNextPlayer: Self = .init {
+        // TODO: Need to check that we're not in last change because if we are and next player called last chance, then it's the end of the round.
+
+        $0.set(phase: .endTurn(.nextPlayer))
+
+        // move this logic out.
+
+        // Run the system actions.
+        // - Check mermaids
+        guard !$0.currentPlayerHasFourMermaids else {
+            $0.set(phase: .endGame)
+            return // End game
+        }
+
+        // Only change to next player so long as nextPlayerUp
+        // $0.currentPlayerUp.next(playersInGame: )
+        // -- Change to next player
+        $0.setNextPlayerUp()
+        $0.set(phase: .waitingForDraw)
+    }
+
+    fileprivate static let endTurnStopCommand: Self = .init { _ in
+
+    }
 }
 
 extension Game {

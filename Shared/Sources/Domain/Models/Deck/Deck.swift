@@ -17,13 +17,31 @@ public struct Deck: Sendable, Hashable {
 
 extension Deck {
     public var leftDiscardPile: [Card] { cards.filter { $0.location == .pile(.discardLeft) } }
-
     public var rightDiscardPile: [Card] { cards.filter { $0.location == .pile(.discardRight) } }
-
     public var drawPile: [Card] { cards.filter({ $0.location == .pile(.draw) }) }
 
     public func cardsInHand(for player: Player.Up) -> [Card] {
         cards.filter { $0.location == .playerHand(player) }
+    }
+
+    public func allCards(for player: Player.Up) -> [Card] {
+        cards.filter { $0.location == .playerHand(player) || $0.location == .playerEffects(player) }
+    }
+
+    public func topCard(pile: Pile) -> Card? {
+        switch pile {
+        case .draw: drawPile.first(where: { $0.location == .pile(.draw) })
+        case .discardLeft: leftDiscardPile.last // Most recent card drawn and placed here
+        case .discardRight: rightDiscardPile.last // Most recent card drawn and placed here
+        }
+    }
+
+    public func bottomCard(pile: Pile) -> Card? {
+        switch pile {
+        case .draw: drawPile.last(where: { $0.location == .pile(.draw) })
+        case .discardLeft: leftDiscardPile.first // Oldest card drawn and placed here
+        case .discardRight: rightDiscardPile.first // Oldest card drawn and placed here
+        }
     }
 }
 

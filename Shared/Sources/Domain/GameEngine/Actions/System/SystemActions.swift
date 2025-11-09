@@ -30,6 +30,14 @@ extension Command where S == GameEngine {
                 cards: $0.dataProvider.shuffleCards($0.cards),
                 playersInGame: players
             )
+            let firstTwoCards = try $0.game.draw(pile: .draw)
+            guard
+                let firstCard = firstTwoCards.first,
+                let secondCard = firstTwoCards.last
+            else { return }
+            $0.game.update(cardID: firstCard.id, toLocation: .pile(.discardLeft))
+            $0.game.update(cardID: secondCard.id, toLocation: .pile(.discardRight))
+            $0.game.set(phase: .waitingForDraw)
         }
     }
 }

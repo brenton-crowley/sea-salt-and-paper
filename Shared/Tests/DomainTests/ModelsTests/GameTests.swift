@@ -34,25 +34,25 @@ struct GameTests {
         // Cycle three the players depending on the players in the game
         switch playersInGame {
         case .two:
-            testSubject.nextPlayer()
+            testSubject.setNextPlayerUp()
             #expect(testSubject.currentPlayerUp == .two, "Players in game: \(playersInGame)")
 
         case .three:
-            testSubject.nextPlayer()
+            testSubject.setNextPlayerUp()
             #expect(testSubject.currentPlayerUp == .two)
-            testSubject.nextPlayer()
+            testSubject.setNextPlayerUp()
             #expect(testSubject.currentPlayerUp == .three)
         case .four:
-            testSubject.nextPlayer()
+            testSubject.setNextPlayerUp()
             #expect(testSubject.currentPlayerUp == .two)
-            testSubject.nextPlayer()
+            testSubject.setNextPlayerUp()
             #expect(testSubject.currentPlayerUp == .three)
-            testSubject.nextPlayer()
+            testSubject.setNextPlayerUp()
             #expect(testSubject.currentPlayerUp == .four)
         }
 
         // Next player should always be player one when at the end of the players in the game.
-        testSubject.nextPlayer()
+        testSubject.setNextPlayerUp()
         #expect(testSubject.currentPlayerUp == .one)
     }
 
