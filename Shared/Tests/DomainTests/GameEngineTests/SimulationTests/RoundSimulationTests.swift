@@ -51,6 +51,39 @@ struct RoundSimulationTests {
         #expect(playerOneScore == 6)
         #expect(playerTwoScore == 8)
     }
+    
+    @Test("Success - Simulate round with player 2 calling 'stop' to end round")
+    func successSimulateRoundWithPlayer2CallingStopToEndRound() async throws {
+        // TODO: AI Implement this test
+        // CONTEXT: If a player says STOP, all players score the points on their cards
+        // - The round of scores should be capture on the game. Probably in a property [Round] where we can identify a player's score with a player.
+        // - Once the round is over, we should start a new round.
+        // - The next player is the player after the one who called STOP.
+        
+        // GIVEN
+        
+        // WHEN
+        
+        // THEN
+    }
+    
+    @Test("Success - Simulate round with player 2 calling 'last chance' to end round")
+    func successSimulateRoundWithPlayer2CallingLastChanceToEndRound() async throws {
+        // TODO: AI Implement this test
+        // CONTEXT: If a player says LAST CHANCE, then all other players each take a final turn, reveal their cards and count their points.
+        // - If BET WON by player: their score is higher or equal to that of their opponents.
+        // - They score the points of their cards PLUS the color bonus.
+        // Their opponents only score their color bonus.
+        // - If BET LOST: the player's score is less than that of any opponent.
+        // The player who called stop only score their color bonus.
+        // Their opponents score the points of their cards.
+        
+        // GIVEN
+        
+        // WHEN
+        
+        // THEN
+    }
 }
 
 extension RoundSimulationTests {

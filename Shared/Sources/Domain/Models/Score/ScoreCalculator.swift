@@ -5,7 +5,7 @@ public struct ScoreCalculator: Sendable {
 
     public init() {}
 
-    // Received an array of Cards
+    // TODO: AI  Context - These are stop calculations only
     public func score(playerRound cards: [Card]) -> Int {
         guard !cards.isEmpty else { return 0 }
 
@@ -16,6 +16,8 @@ public struct ScoreCalculator: Sendable {
             CountScore.mermaids.scoreForCards(cards)
         ].reduce(0, +)
     }
+    
+    // TODO: AI - Add ways to calculate scores for a last chance situation.
 }
 
 // MARK: - Private API

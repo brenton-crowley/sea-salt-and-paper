@@ -9,7 +9,7 @@ public struct Game: Sendable, Hashable, Identifiable {
     internal(set) public var deck: Deck = .init()
     internal(set) public var phase: Game.Phase = .waitingForStart
     internal(set) public var currentPlayerUp: Player.Up = .one
-    internal(set) public var rounds: [Game.Round] = []
+    internal(set) public var rounds: [Game.Round] = [] // TODO: AI - This property should track the all the game's rounds and scores of players in each round.
 
     public init(id: UUID, cards: [Card], playersInGame: Player.InGameCount) {
         self.id = id
