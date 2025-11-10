@@ -130,7 +130,8 @@ extension Command where S == Game {
     }
 
     fileprivate static let endTurnNextPlayer: Self = .init {
-        // TODO: Need to check that we're not in last change because if we are and next player called last chance, then it's the end of the round.
+        // TODO: Need to check that we're not in last chance because if we are and next player called last chance, then it's the end of the round.
+        // TODO: AI we may need to refactor out some of this logic based on the comment on the line above.
 
         $0.set(phase: .endTurn(.nextPlayer))
 

@@ -59,6 +59,7 @@ struct RoundSimulationTests {
         // - The round of scores should be capture on the game. Probably in a property [Round] where we can identify a player's score with a player.
         // - Once the round is over, we should start a new round.
         // - The next player is the player after the one who called STOP.
+        // Use Deck.roundDeck for deterministic tests
         
         // GIVEN
         
@@ -77,6 +78,7 @@ struct RoundSimulationTests {
         // - If BET LOST: the player's score is less than that of any opponent.
         // The player who called stop only score their color bonus.
         // Their opponents score the points of their cards.
+        // Use Deck.roundDeck for deterministic tests
         
         // GIVEN
         
