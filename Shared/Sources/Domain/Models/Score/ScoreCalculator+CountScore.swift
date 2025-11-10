@@ -75,6 +75,9 @@ extension ScoreCalculator.CountScore {
 
         guard mermaidCount > 0 else { return 0 }
 
+        // TODO: AI Refactor color score into a method that can be reused by this context but also in other contexts outside of mermaid such as when calculating last chance.
+        // CONTEXT: This method is optimised for mermaids but we should be able to resuse this logic so that we can quickly calculate the logic for the color bonus when
+        // calculating for last chance bets.
         let colorScore = (0..<mermaidCount).indices.reduce(0) { score, mermaidIndex in
             guard colorCounts.indices.contains(mermaidIndex) else { return score }
             return score + colorCounts[mermaidIndex].value
