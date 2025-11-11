@@ -95,6 +95,9 @@ struct RoundSimulationTests {
         // Validate scores
         #expect(testSubject.game.currentRound?.points[.one] == 6)
         #expect(testSubject.game.currentRound?.points[.two] == 8)
+        
+        // No winner
+        #expect(testSubject.game.winner == nil)
     }
     
     @Test("Success - Simulate round with player 2 calling 'last chance' to end round")

@@ -169,6 +169,11 @@ extension Command where S == Game {
         
         // Calculate the scores
         $0.set(roundPoints: ScoreCalculator.roundPointsForStop(cards: $0.deck.cards))
+        
+        // Check if there is a winner.
+        if $0.winner != nil { $0.set(phase: .endGame) }
+        
+        // Ask user to start new round.
     }
 }
 

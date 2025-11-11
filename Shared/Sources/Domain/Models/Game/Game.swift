@@ -32,6 +32,10 @@ extension Game {
             .filter { $0.kind == .mermaid }
             .count == 4
     }
+    
+    public var winner: Player.ID? {
+        ScoreCalculator.winner(rounds: rounds, players: players)
+    }
 }
 
 // MARK: - Public Methods
@@ -76,6 +80,11 @@ extension Game {
         guard rounds.indices.contains(where: { $0 == lastRoundIndex }) else { return }
         rounds[lastRoundIndex].set(points: roundPoints)
     }
+    
+    public mutating func addNewRound() {
+        rounds.append(.init())
+    }
+    
 }
 
 // MARK: - Private API
