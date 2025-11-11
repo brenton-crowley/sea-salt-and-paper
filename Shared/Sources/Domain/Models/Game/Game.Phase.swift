@@ -10,8 +10,7 @@ extension Game {
         public var id: Self { self }
     }
 
-    public enum EndTurnKind: Sendable, Hashable, Identifiable {
-        case nextPlayer
+    public enum EndRoundKind: Sendable, Hashable, Identifiable {
         case stop
         case lastChance
 
@@ -24,7 +23,7 @@ extension Game {
         case waitingForDiscard
         case waitingForPlay
         case resolvingEffect(Game.Effect)
-        case endTurn(Game.EndTurnKind)
+        case roundEnded(Game.EndRoundKind)
         case endGame
 
         public var id: Self { self }

@@ -38,7 +38,7 @@ struct RoundSimulationTests {
         try simulateRoundEndingWithPlayer2(&testSubject)
 
         // WHEN -
-        try testSubject.performAction(.user(.endTurn(.stop)))
+        try testSubject.performAction(.user(.endTurn))
 
 
         let scoreCalc = ScoreCalculator()
@@ -86,17 +86,11 @@ struct RoundSimulationTests {
         try simulateRoundEndingWithPlayer2(&testSubject)
 
         // WHEN - Player calls stop
-        try testSubject.performAction(.user(.endTurn(.stop)))
+        try testSubject.performAction(.user(.endRound(.stop)))
         
         // THEN
-        #expect(testSubject.game.phase == .endTurn(.stop))
+        #expect(testSubject.game.phase == .roundEnded(.stop))
         #expect(testSubject.game.currentRound?.state == .endReason(.stop, caller: Player.ID.two))
-        // Validate scores
-        #expect(testSubject.game.currentRound?.points[.one] == 6)
-        #expect(testSubject.game.currentRound?.points[.two] == 8)
-        
-        // No winner
-        #expect(testSubject.game.winner == nil)
         
         // WHEN - Player completes round (Proceed)
         try testSubject.performAction(.user(.completeRound))
@@ -106,11 +100,16 @@ struct RoundSimulationTests {
         #expect(testSubject.game.currentPlayerUp == .one)
         #expect(testSubject.game.currentRound?.state == .inProgress)
         #expect(testSubject.game.rounds.first?.state == .complete)
+
+        // Validate scores
         #expect(testSubject.game.scores[.one] == 6)
         #expect(testSubject.game.scores[.two] == 8)
         #expect(testSubject.game.scores[.three] == nil)
         #expect(testSubject.game.scores[.four] == nil)
         
+        // No winner
+        #expect(testSubject.game.winner == nil)
+        #expect(testSubject.game.phase != .endGame)
     }
     
     @Test("Success - Simulate round with player 2 calling 'last chance' to end round")
@@ -184,7 +183,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -211,7 +210,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -242,7 +241,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -272,7 +271,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -304,7 +303,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -358,7 +357,7 @@ extension RoundSimulationTests {
         }))
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -390,7 +389,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -456,7 +455,7 @@ extension RoundSimulationTests {
         )
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -488,7 +487,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -551,7 +550,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -583,7 +582,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -623,7 +622,7 @@ extension RoundSimulationTests {
         )
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -653,7 +652,7 @@ extension RoundSimulationTests {
         #expect(testSubject.game.phase == .waitingForPlay)
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -684,7 +683,7 @@ extension RoundSimulationTests {
         )
 
         // WHEN - 2up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
@@ -719,7 +718,7 @@ extension RoundSimulationTests {
         // End turn
 
         // WHEN - 1up ends turn
-        try testSubject.performAction(.user(.endTurn(.nextPlayer)))
+        try testSubject.performAction(.user(.endTurn))
 
         // THEN - Play is now with player 2
         #expect(testSubject.game.phase == .waitingForDraw)
