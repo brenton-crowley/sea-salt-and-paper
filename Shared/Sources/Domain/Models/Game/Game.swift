@@ -33,7 +33,13 @@ extension Game {
             .count == 4
     }
     
-    public var winner: Player.ID? { ScoreCalculator.winner(rounds: rounds) }
+    public var winner: Player.ID? {
+        guard let mermaidWinner = deck.playerWithFourMermaids else {
+            return ScoreCalculator.winnerByTotalPoints(rounds: rounds)
+        }
+        
+        return mermaidWinner
+    }
     
     public var scores: [Player.ID: Int] { ScoreCalculator.totalPoints(rounds: rounds) }
 }

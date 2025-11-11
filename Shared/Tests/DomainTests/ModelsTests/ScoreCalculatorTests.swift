@@ -225,7 +225,7 @@ struct ScoringTests {
         
         // WHEN
         let totalPoints = ScoreCalculator.totalPoints(rounds: rounds)
-        let winner = ScoreCalculator.winner(rounds: rounds)
+        let winner = ScoreCalculator.winnerByTotalPoints(rounds: rounds)
         
         // THEN
         #expect(totalPoints[.one] == 40)
@@ -244,7 +244,7 @@ struct ScoringTests {
         
         // WHEN
         let totalPoints = ScoreCalculator.totalPoints(rounds: rounds)
-        let winner = ScoreCalculator.winner(rounds: rounds)
+        let winner = ScoreCalculator.winnerByTotalPoints(rounds: rounds)
         
         // THEN
         #expect(totalPoints[.one] == 40)
@@ -263,7 +263,7 @@ struct ScoringTests {
         
         // WHEN
         let totalPoints = ScoreCalculator.totalPoints(rounds: rounds)
-        let winner = ScoreCalculator.winner(rounds: rounds)
+        let winner = ScoreCalculator.winnerByTotalPoints(rounds: rounds)
         
         // THEN
         #expect(totalPoints[.one] == 40)
@@ -282,7 +282,7 @@ struct ScoringTests {
         
         // WHEN
         let totalPoints = ScoreCalculator.totalPoints(rounds: rounds)
-        let winner = ScoreCalculator.winner(rounds: rounds)
+        let winner = ScoreCalculator.winnerByTotalPoints(rounds: rounds)
         
         // THEN
         #expect(totalPoints[.one] == 43)

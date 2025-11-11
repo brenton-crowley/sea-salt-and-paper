@@ -42,9 +42,7 @@ public struct ScoreCalculator: Sendable {
         }
     }
     
-    public static func winner(rounds: [Game.Round]) -> Player.ID? {
-        // TODO: Check if any player has four mermaids in their hand
-        
+    public static func winnerByTotalPoints(rounds: [Game.Round]) -> Player.ID? {
         // 1) Determine threshold from player count
         guard
             let playerCount = rounds.first?.points.keys.count,
