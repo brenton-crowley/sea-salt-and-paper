@@ -54,7 +54,6 @@ struct RoundSimulationTests {
     
     @Test("Success - Simulate round with player 2 calling 'stop' to end round")
     func successSimulateRoundWithPlayer2CallingStopToEndRound() async throws {
-        // TODO: AI Implement this test
         // CONTEXT: If a player says STOP, all players score the points on their cards
         // - The round of scores should be capture on the game. Probably in a property [Round] where we can identify a player's score with a player.
         // - Once the round is over, we should start a new round.
@@ -86,7 +85,7 @@ struct RoundSimulationTests {
         // Simulate turns
         try simulateRoundEndingWithPlayer2(&testSubject)
 
-        // WHEN -
+        // WHEN - Player calls stop
         try testSubject.performAction(.user(.endTurn(.stop)))
         
         // THEN
@@ -98,6 +97,20 @@ struct RoundSimulationTests {
         
         // No winner
         #expect(testSubject.game.winner == nil)
+        
+        // WHEN - Player completes round (Proceed)
+        try testSubject.performAction(.user(.completeRound))
+        
+        // THEN
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .one)
+        #expect(testSubject.game.currentRound?.state == .inProgress)
+        #expect(testSubject.game.rounds.first?.state == .complete)
+        #expect(testSubject.game.scores[.one] == 6)
+        #expect(testSubject.game.scores[.two] == 8)
+        #expect(testSubject.game.scores[.three] == nil)
+        #expect(testSubject.game.scores[.four] == nil)
+        
     }
     
     @Test("Success - Simulate round with player 2 calling 'last chance' to end round")

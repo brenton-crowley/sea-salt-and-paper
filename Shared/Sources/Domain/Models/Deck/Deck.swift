@@ -43,6 +43,21 @@ extension Deck {
         case .discardRight: rightDiscardPile.first // Oldest card drawn and placed here
         }
     }
+    
+    public var playerWithFourMermaids: Player.ID? {
+        let mermaidOwners: [Player.ID] = cards
+            .compactMap {
+                guard $0.kind == .mermaid, case let .playerHand(id) = $0.location else { return nil }
+                return id
+            }
+        
+        guard mermaidOwners.count == 4 else { return nil }
+        
+        // Find a player who has all four mermaids
+        for playerUp in Player.Up.allCases { if mermaidOwners.allSatisfy({ $0 == playerUp }) { return playerUp } }
+        
+        return nil
+    }
 }
 
 // MARK: - Public API Methods

@@ -22,7 +22,7 @@ public struct GameEngine: Sendable {
 // MARK: - Public API
 extension GameEngine {
     public mutating func performAction(_ action: GameEngine.Action) throws {
-        guard actionIsPlayable(action) else { return } // Maybe throw here
+        guard actionIsPlayable(action) else { return } // TODO: Maybe throw here
 
         switch action {
         case .user(.endTurn(.nextPlayer)): try Models.Action<Game>.endTurnNextPlayer.execute(on: &game)

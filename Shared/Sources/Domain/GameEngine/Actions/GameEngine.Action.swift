@@ -22,6 +22,7 @@ extension GameEngine.Action {
         case playEffectWithCards(Card.ID, Card.ID)
         case stealCard(Card.ID)
         case endTurn(Game.EndTurnKind)
+        case completeRound
 
         public var id: Self { self }
     }
@@ -57,6 +58,7 @@ extension GameEngine.Action.User {
         case .endTurn(.nextPlayer): .endTurnNextPlayer
         case .endTurn(.stop): .endTurnStop
         case .endTurn(.lastChance): .endTurnNextPlayer // TODO: AI Create and end turn last chance action.
+        case .completeRound: .completeRound
         }
     }
 }

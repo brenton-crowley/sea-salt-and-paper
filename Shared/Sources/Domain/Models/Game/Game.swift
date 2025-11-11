@@ -34,6 +34,8 @@ extension Game {
     }
     
     public var winner: Player.ID? { ScoreCalculator.winner(rounds: rounds) }
+    
+    public var scores: [Player.ID: Int] { ScoreCalculator.totalPoints(rounds: rounds) }
 }
 
 // MARK: - Public Methods

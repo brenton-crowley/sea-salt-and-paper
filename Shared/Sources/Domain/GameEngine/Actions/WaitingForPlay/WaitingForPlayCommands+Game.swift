@@ -24,6 +24,7 @@ extension Action where S == Game {
     
     static let endTurnStop: Self = .init(rule: .ruleToEndTurnStop, command: .endTurnStopCommand)
 
+    static let completeRound: Self = .init(rule: .ruleToCompleteRound, command: .completeRoundCommand)
 }
 
 // MARK: - Game Validations
@@ -74,6 +75,11 @@ extension ValidationRule where Input == Game {
     // (We can tighten this later per your spreadsheet.)
     fileprivate static let ruleToEndTurnStop: Self  = .init {
         guard $0.phase(equals: .waitingForPlay) else { return false }
+        return true
+    }
+    
+    fileprivate static let ruleToCompleteRound: Self  = .init {
+        guard $0.phase(equals: .endTurn(.stop)) || $0.phase(equals: .endTurn(.lastChance)) else { return false }
         return true
     }
 }
@@ -174,6 +180,14 @@ extension Command where S == Game {
         if $0.winner != nil { $0.set(phase: .endGame) }
         
         // Ask user to start new round.
+    }
+    
+    fileprivate static let completeRoundCommand: Self = .init {
+//        guard case let .endReason(_, caller) = $0.currentRound?.state else { return }
+        $0.set(roundState: .complete) // Complete round
+        $0.addNewRound() // Add a new round
+        $0.setNextPlayerUp() // Move to next player up
+        $0.set(phase: .waitingForDraw) // Set to waiting for draw
     }
 }
 
