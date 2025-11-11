@@ -25,7 +25,7 @@ extension Player.Up {
 }
 
 extension Player.InGameCount {
-    init?(count: Int) {
+    public init?(count: Int) {
         switch count {
         case 2: self = .two
         case 3: self = .three

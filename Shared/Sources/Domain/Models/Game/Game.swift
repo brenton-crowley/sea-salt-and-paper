@@ -33,9 +33,7 @@ extension Game {
             .count == 4
     }
     
-    public var winner: Player.ID? {
-        ScoreCalculator.winner(rounds: rounds, players: players)
-    }
+    public var winner: Player.ID? { ScoreCalculator.winner(rounds: rounds) }
 }
 
 // MARK: - Public Methods

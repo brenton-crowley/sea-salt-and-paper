@@ -42,11 +42,13 @@ public struct ScoreCalculator: Sendable {
         }
     }
     
-    public static func winner(rounds: [Game.Round], players: [Player.ID : Player]) -> Player.ID? {
+    public static func winner(rounds: [Game.Round]) -> Player.ID? {
         // TODO: Check if any player has four mermaids in their hand
         
         // 1) Determine threshold from player count
-        guard let numPlayers = Player.InGameCount(count: players.keys.count) else { return nil }
+        guard
+            let playerCount = rounds.first?.points.keys.count,
+            let numPlayers = Player.InGameCount(count: playerCount) else { return nil }
 
         // 2) Totals across all rounds
         let totals = ScoreCalculator.totalPoints(rounds: rounds)
