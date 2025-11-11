@@ -9,11 +9,14 @@ public struct Game: Sendable, Hashable, Identifiable {
     internal(set) public var deck: Deck = .init()
     internal(set) public var phase: Game.Phase = .waitingForStart
     internal(set) public var currentPlayerUp: Player.Up = .one
-    internal(set) public var rounds: [Game.Round] = []
+    internal(set) public var rounds: [Game.Round]
+    
+    public var currentRound: Game.Round? { rounds.last }
 
     public init(id: UUID, cards: [Card], playersInGame: Player.InGameCount) {
         self.id = id
         self.deck.loadDeck(cards)
+        self.rounds = [.init(state: .inProgress)] // Create first round
         setupPlayers(playersInGame)
     }
 }
@@ -29,6 +32,16 @@ extension Game {
             .filter { $0.kind == .mermaid }
             .count == 4
     }
+    
+    public var winner: Player.ID? {
+        guard let mermaidWinner = deck.playerWithFourMermaids else {
+            return ScoreCalculator.winnerByTotalPoints(rounds: rounds)
+        }
+        
+        return mermaidWinner
+    }
+    
+    public var scores: [Player.ID: Int] { ScoreCalculator.totalPoints(rounds: rounds) }
 }
 
 // MARK: - Public Methods
@@ -61,6 +74,23 @@ extension Game {
     public func cardsInHand(ofPlayer player: Player.Up) -> [Card] {
         deck.cardsInHand(for: player)
     }
+    
+    public mutating func set(roundState: Round.State) {
+        let lastRoundIndex = rounds.index(before: rounds.endIndex)
+        guard rounds.indices.contains(where: { $0 == lastRoundIndex }) else { return }
+        rounds[lastRoundIndex].set(state: roundState)
+    }
+    
+    public mutating func set(roundPoints: [Player.ID: Int]) {
+        let lastRoundIndex = rounds.index(before: rounds.endIndex)
+        guard rounds.indices.contains(where: { $0 == lastRoundIndex }) else { return }
+        rounds[lastRoundIndex].set(points: roundPoints)
+    }
+    
+    public mutating func addNewRound() {
+        rounds.append(.init())
+    }
+    
 }
 
 // MARK: - Private API

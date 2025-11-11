@@ -136,6 +136,42 @@ struct DeckTests {
         #expect(playerFourHand.allSatisfy({ $0.location == .playerHand(.four) }))
 
     }
+    
+    @Test("Player has four mermaids")
+    func playerHasFourMermaids() async throws {
+        // GIVEN
+        var testSubject = Deck()
+        testSubject.loadDeck([
+            .mermaid(id: 0, location: .playerHand(.one)),
+            .mermaid(id: 1, location: .playerHand(.one)),
+            .mermaid(id: 2, location: .playerHand(.one)),
+            .mermaid(id: 3, location: .playerHand(.one)),
+        ])
+
+        // WHEN
+        let result = testSubject.playerWithFourMermaids
+
+        // THEN
+        #expect(result == .one)
+    }
+    
+    @Test("No player has four mermaids")
+    func noPlayerHasFourMermaids() async throws {
+        // GIVEN
+        var testSubject = Deck()
+        testSubject.loadDeck([
+            .mermaid(id: 0, location: .playerHand(.one)),
+            .mermaid(id: 1, location: .playerHand(.two)),
+            .mermaid(id: 2, location: .playerHand(.three)),
+            .mermaid(id: 3, location: .playerHand(.four)),
+        ])
+
+        // WHEN
+        let result = testSubject.playerWithFourMermaids
+
+        // THEN
+        #expect(result == nil)
+    }
 }
 
 extension Array where Element == Card {

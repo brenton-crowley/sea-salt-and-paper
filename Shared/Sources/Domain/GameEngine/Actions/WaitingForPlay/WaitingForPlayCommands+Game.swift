@@ -21,6 +21,10 @@ extension Action where S == Game {
         rule: .ruleToEndTurn,
         command: .endTurnNextPlayer
     )
+    
+    static let endTurnStop: Self = .init(rule: .ruleToEndTurnStop, command: .endTurnStopCommand)
+
+    static let completeRound: Self = .init(rule: .ruleToCompleteRound, command: .completeRoundCommand)
 }
 
 // MARK: - Game Validations
@@ -64,6 +68,18 @@ extension ValidationRule where Input == Game {
 
     fileprivate static let ruleToEndTurn: Self  = .init {
         guard $0.phase(equals: .waitingForPlay) else { return false }
+        return true
+    }
+    
+    // Keep it minimal for now: only legal while the current player is in the Play phase.
+    // (We can tighten this later per your spreadsheet.)
+    fileprivate static let ruleToEndTurnStop: Self  = .init {
+        guard $0.phase(equals: .waitingForPlay) else { return false }
+        return true
+    }
+    
+    fileprivate static let ruleToCompleteRound: Self  = .init {
+        guard $0.phase(equals: .endTurn(.stop)) || $0.phase(equals: .endTurn(.lastChance)) else { return false }
         return true
     }
 }
@@ -130,7 +146,8 @@ extension Command where S == Game {
     }
 
     fileprivate static let endTurnNextPlayer: Self = .init {
-        // TODO: Need to check that we're not in last change because if we are and next player called last chance, then it's the end of the round.
+        // TODO: Need to check that we're not in last chance because if we are and next player called last chance, then it's the end of the round.
+        // TODO: AI we may need to refactor out some of this logic based on the comment on the line above.
 
         $0.set(phase: .endTurn(.nextPlayer))
 
@@ -150,8 +167,27 @@ extension Command where S == Game {
         $0.set(phase: .waitingForDraw)
     }
 
-    fileprivate static let endTurnStopCommand: Self = .init { _ in
-
+    fileprivate static let endTurnStopCommand: Self = .init {
+        $0.set(phase: .endTurn(.stop))
+        
+        // Update the state on the round.
+        $0.set(roundState: .endReason(.stop, caller: $0.currentPlayerUp))
+        
+        // Calculate the scores
+        $0.set(roundPoints: ScoreCalculator.roundPointsForStop(cards: $0.deck.cards))
+        
+        // Check if there is a winner.
+        if $0.winner != nil { $0.set(phase: .endGame) }
+        
+        // Ask user to start new round.
+    }
+    
+    fileprivate static let completeRoundCommand: Self = .init {
+//        guard case let .endReason(_, caller) = $0.currentRound?.state else { return }
+        $0.set(roundState: .complete) // Complete round
+        $0.addNewRound() // Add a new round
+        $0.setNextPlayerUp() // Move to next player up
+        $0.set(phase: .waitingForDraw) // Set to waiting for draw
     }
 }
 

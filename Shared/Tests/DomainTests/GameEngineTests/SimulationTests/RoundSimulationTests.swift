@@ -51,6 +51,86 @@ struct RoundSimulationTests {
         #expect(playerOneScore == 6)
         #expect(playerTwoScore == 8)
     }
+    
+    @Test("Success - Simulate round with player 2 calling 'stop' to end round")
+    func successSimulateRoundWithPlayer2CallingStopToEndRound() async throws {
+        // CONTEXT: If a player says STOP, all players score the points on their cards
+        // - The round of scores should be capture on the game. Probably in a property [Round] where we can identify a player's score with a player.
+        // - Once the round is over, we should start a new round.
+        // - The next player is the player after the one who called STOP.
+        // Use Deck.roundDeck for deterministic tests
+        
+        // GIVEN
+        let (stream, continuation) = AsyncStream<GameEngine.Event>.makeStream()
+        let sendEvent: @Sendable (_ event: GameEngine.Event) -> Void = { [continuation] in continuation.yield($0) }
+        let dataProvider = GameEngine.DataProvider(
+            deck: { .roundDeck },
+            newGameID: { .mockGameID() },
+            saveGame: { _ in },
+            shuffleCards: { $0 },
+            streamOfGameEngineEvents: { [stream] in stream },
+            sendEvent: sendEvent
+        )
+        var testSubject = GameEngine(dataProvider: dataProvider)
+
+        // WHEN
+        try testSubject.performAction(.system(.createGame(players: .two)))
+
+        // THEN - Set up game
+        #expect(testSubject.game.id == .mockGameID())
+        #expect(testSubject.game.deck.leftDiscardPile.first == .init(id: 0, kind: .duo(.crab), color: .lightBlue, location: .pile(.discardLeft)))
+        #expect(testSubject.game.deck.rightDiscardPile.first == .init(id: 1, kind: .collector(.shell), color: .lightGrey, location: .pile(.discardRight)))
+        #expect(testSubject.game.phase == .waitingForDraw)
+
+        // Simulate turns
+        try simulateRoundEndingWithPlayer2(&testSubject)
+
+        // WHEN - Player calls stop
+        try testSubject.performAction(.user(.endTurn(.stop)))
+        
+        // THEN
+        #expect(testSubject.game.phase == .endTurn(.stop))
+        #expect(testSubject.game.currentRound?.state == .endReason(.stop, caller: Player.ID.two))
+        // Validate scores
+        #expect(testSubject.game.currentRound?.points[.one] == 6)
+        #expect(testSubject.game.currentRound?.points[.two] == 8)
+        
+        // No winner
+        #expect(testSubject.game.winner == nil)
+        
+        // WHEN - Player completes round (Proceed)
+        try testSubject.performAction(.user(.completeRound))
+        
+        // THEN
+        #expect(testSubject.game.phase == .waitingForDraw)
+        #expect(testSubject.game.currentPlayerUp == .one)
+        #expect(testSubject.game.currentRound?.state == .inProgress)
+        #expect(testSubject.game.rounds.first?.state == .complete)
+        #expect(testSubject.game.scores[.one] == 6)
+        #expect(testSubject.game.scores[.two] == 8)
+        #expect(testSubject.game.scores[.three] == nil)
+        #expect(testSubject.game.scores[.four] == nil)
+        
+    }
+    
+    @Test("Success - Simulate round with player 2 calling 'last chance' to end round")
+    func successSimulateRoundWithPlayer2CallingLastChanceToEndRound() async throws {
+        // TODO: AI Implement this test
+        // CONTEXT: If a player says LAST CHANCE, then all other players each take a final turn, reveal their cards and count their points.
+        // - If BET WON by player: their score is higher or equal to that of their opponents.
+        // - They score the points of their cards PLUS the color bonus.
+        // Their opponents only score their color bonus.
+        // - If BET LOST: the player's score is less than that of any opponent.
+        // The player who called stop only score their color bonus.
+        // Their opponents score the points of their cards.
+        // Use Deck.roundDeck for deterministic tests
+        
+        // GIVEN
+        
+        // WHEN
+        
+        // THEN
+    }
 }
 
 extension RoundSimulationTests {

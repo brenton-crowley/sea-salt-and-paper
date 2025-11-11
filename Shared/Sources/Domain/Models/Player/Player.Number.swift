@@ -25,11 +25,28 @@ extension Player.Up {
 }
 
 extension Player.InGameCount {
+    public init?(count: Int) {
+        switch count {
+        case 2: self = .two
+        case 3: self = .three
+        case 4: self = .four
+        default: return nil
+        }
+    }
+    
     public var intValue: Int {
         switch self {
         case .two: 2
         case .three: 3
         case .four: 4
+        }
+    }
+    
+    public var winningPointsThreshold: Int {
+        switch self {
+        case .two: 40
+        case .three: 35
+        case .four: 30
         }
     }
 }

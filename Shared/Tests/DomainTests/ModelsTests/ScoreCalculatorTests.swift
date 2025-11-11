@@ -1,5 +1,5 @@
+@testable import Models
 import Foundation
-import Models
 import Testing
 
 struct ScoringTests {
@@ -217,4 +217,109 @@ struct ScoringTests {
         // THEN
         #expect(score == input.expectedScore, "Cards: \(input.cards.map(\.kind))")
     }
+    
+    @Test("Total Points Tests")
+    func totalPointsTests() async throws {
+        // GIVEN
+        let rounds: [Game.Round] = .twoPlayersPlayerOneWins
+        
+        // WHEN
+        let totalPoints = ScoreCalculator.totalPoints(rounds: rounds)
+        let winner = ScoreCalculator.winnerByTotalPoints(rounds: rounds)
+        
+        // THEN
+        #expect(totalPoints[.one] == 40)
+        #expect(totalPoints[.two] == 38)
+        #expect(winner == .one)
+    }
+    
+    @Test("Both players tie, but player one has most recent highest score and is winner")
+    func tieWithPlayerOneWinnerOnCountback() async throws {
+        // GIVEN
+        let rounds: [Game.Round] = [
+            .init(state: .complete, points: [.one: 32, .two: 33]),
+            .init(state: .complete, points: [.one: 3, .two: 2]),
+            .init(state: .complete, points: [.one: 5, .two: 5]),
+        ]
+        
+        // WHEN
+        let totalPoints = ScoreCalculator.totalPoints(rounds: rounds)
+        let winner = ScoreCalculator.winnerByTotalPoints(rounds: rounds)
+        
+        // THEN
+        #expect(totalPoints[.one] == 40)
+        #expect(totalPoints[.two] == 40)
+        #expect(winner == .one)
+    }
+    
+    @Test("Both players tie, players tied whole match")
+    func tieNoBreaker() async throws {
+        // GIVEN
+        let rounds: [Game.Round] = [
+            .init(state: .complete, points: [.one: 33, .two: 33]),
+            .init(state: .complete, points: [.one: 2, .two: 2]),
+            .init(state: .complete, points: [.one: 5, .two: 5]),
+        ]
+        
+        // WHEN
+        let totalPoints = ScoreCalculator.totalPoints(rounds: rounds)
+        let winner = ScoreCalculator.winnerByTotalPoints(rounds: rounds)
+        
+        // THEN
+        #expect(totalPoints[.one] == 40)
+        #expect(totalPoints[.two] == 40)
+        #expect(winner == nil)
+    }
+    
+    @Test("Both players tie, player two come from behind in last round")
+    func tiePlayerTwoWinsLastRoundHigherScore() async throws {
+        // GIVEN
+        let rounds: [Game.Round] = [
+            .init(state: .complete, points: [.one: 33, .two: 32]),
+            .init(state: .complete, points: [.one: 6, .two: 6]),
+            .init(state: .complete, points: [.one: 4, .two: 5]), // Higher score
+        ]
+        
+        // WHEN
+        let totalPoints = ScoreCalculator.totalPoints(rounds: rounds)
+        let winner = ScoreCalculator.winnerByTotalPoints(rounds: rounds)
+        
+        // THEN
+        #expect(totalPoints[.one] == 43)
+        #expect(totalPoints[.two] == 43)
+        #expect(winner == .two)
+    }
+}
+
+extension Game.Round {
+    fileprivate static let twoPlayersRound1: Self = .init(
+        state: .complete,
+        points: [.one: 3, .two: 7]
+    )
+    
+    fileprivate static let twoPlayersRound2: Self = .init(
+        state: .complete,
+        points: [.one: 7, .two: 3]
+    )
+    
+    fileprivate static let twoPlayersRound3: Self = .init(
+        state: .complete,
+        points: [.one: 11, .two: 9]
+    )
+    
+    fileprivate static let twoPlayersRound4: Self = .init(
+        state: .complete,
+        points: [.one: 14, .two: 12]
+    )
+    
+    fileprivate static let twoPlayersRound5: Self = .init(
+        state: .complete,
+        points: [.one: 5, .two: 7]
+    )
+}
+
+extension Array where Element == Game.Round {
+    fileprivate static let twoPlayersPlayerOneWins: Self = [
+        .twoPlayersRound1, .twoPlayersRound2, .twoPlayersRound3, .twoPlayersRound4, .twoPlayersRound5
+    ]
 }
