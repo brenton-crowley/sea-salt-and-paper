@@ -4,26 +4,16 @@ import Models
 // MARK: - Game Actions
 extension Action where S == Game {
     static func playEffect(cards: (Card.ID, Card.ID)) -> Self {
-        .init(
-            rule: .ruleToPlayEffect(cards: cards),
-            command: .playEffect(cards: cards)
-        )
+        .init(rule: .ruleToPlayEffect(cards: cards), command: .playEffect(cards: cards))
     }
 
     static func stealCard(cardID: Card.ID) -> Self {
-        .init(
-            rule: .ruleToStealCard(cardID: cardID),
-            command: .stealCard(cardID: cardID)
-        )
+        .init(rule: .ruleToStealCard(cardID: cardID), command: .stealCard(cardID: cardID))
     }
 
-    static let endTurnNextPlayer: Self = .init(
-        rule: .ruleToEndTurn,
-        command: .endTurnNextPlayer
-    )
-    
-    static let endTurnStop: Self = .init(rule: .ruleToEndTurnStop, command: .endTurnStopCommand)
-
+    static let endTurnNextPlayer: Self = .init(rule: .ruleToEndTurn, command: .endTurnNextPlayer)
+    static let endRoundStop: Self = .init(rule: .ruleToEndRoundStop, command: .endRoundStopCommand)
+    static let endRoundLastChance: Self = .init(rule: .ruleToEndRoundLastChance, command: .endRoundLastChanceCommand)
     static let completeRound: Self = .init(rule: .ruleToCompleteRound, command: .completeRoundCommand)
 }
 
@@ -67,19 +57,42 @@ extension ValidationRule where Input == Game {
     }
 
     fileprivate static let ruleToEndTurn: Self  = .init {
-        guard $0.phase(equals: .waitingForPlay) else { return false }
+        guard
+            $0.phase(equals: .waitingForPlay),
+            !lastChanceEndingRound(game: $0)
+        else { return false }
         return true
     }
     
-    // Keep it minimal for now: only legal while the current player is in the Play phase.
-    // (We can tighten this later per your spreadsheet.)
-    fileprivate static let ruleToEndTurnStop: Self  = .init {
-        guard $0.phase(equals: .waitingForPlay) else { return false }
+    fileprivate static let ruleToEndRoundStop: Self  = .init {
+        guard
+            $0.phase(equals: .waitingForPlay),
+            $0.currentRound?.state == .inProgress
+        else { return false }
+        return true
+    }
+    
+    fileprivate static let ruleToEndRoundLastChance: Self  = .init {
+        guard
+            $0.phase(equals: .waitingForPlay),
+            $0.currentRound?.state == .inProgress
+        else { return false }
         return true
     }
     
     fileprivate static let ruleToCompleteRound: Self  = .init {
-        guard $0.phase(equals: .endTurn(.stop)) || $0.phase(equals: .endTurn(.lastChance)) else { return false }
+        guard
+            $0.phase(equals: .roundEnded(.stop))
+            || $0.phase(equals: .roundEnded(.lastChance))
+        else { return false }
+        return true
+    }
+    
+    private static func lastChanceEndingRound(game: Game) -> Bool {
+        guard
+            case let .endReason(.lastChance, caller) = game.currentRound?.state,
+            caller == game.currentPlayerUp
+        else { return false }
         return true
     }
 }
@@ -146,44 +159,54 @@ extension Command where S == Game {
     }
 
     fileprivate static let endTurnNextPlayer: Self = .init {
-        // TODO: Need to check that we're not in last chance because if we are and next player called last chance, then it's the end of the round.
-        // TODO: AI we may need to refactor out some of this logic based on the comment on the line above.
-
-        $0.set(phase: .endTurn(.nextPlayer))
-
-        // move this logic out.
-
         // Run the system actions.
         // - Check mermaids
         guard !$0.currentPlayerHasFourMermaids else {
             $0.set(phase: .endGame)
             return // End game
         }
-
-        // Only change to next player so long as nextPlayerUp
-        // $0.currentPlayerUp.next(playersInGame: )
-        // -- Change to next player
-        $0.setNextPlayerUp()
-        $0.set(phase: .waitingForDraw)
+        
+        // Need to check that we're not in last chance because if we are and next player called last chance, then it's the end of the round.
+        if
+            case let .endReason(.lastChance, caller) = $0.currentRound?.state,
+            caller == $0.nextPlayerUp {
+            // We've completed a final round so set state end turn last chance
+            $0.setNextPlayerUp()
+            $0.set(phase: .roundEnded(.lastChance))
+        } else {
+            $0.setNextPlayerUp()
+            $0.set(phase: .waitingForDraw)
+        }
     }
 
-    fileprivate static let endTurnStopCommand: Self = .init {
-        $0.set(phase: .endTurn(.stop))
+    fileprivate static let endRoundStopCommand: Self = .init {
+        $0.set(phase: .roundEnded(.stop))
         
         // Update the state on the round.
         $0.set(roundState: .endReason(.stop, caller: $0.currentPlayerUp))
         
-        // Calculate the scores
-        $0.set(roundPoints: ScoreCalculator.roundPointsForStop(cards: $0.deck.cards))
-        
-        // Check if there is a winner.
-        if $0.winner != nil { $0.set(phase: .endGame) }
-        
         // Ask user to start new round.
     }
     
+    fileprivate static let endRoundLastChanceCommand: Self = .init {
+        // We only want to set a flag that last chance has been called.
+        // We'll calculate last chance in the next up turn.
+        $0.set(roundState: .endReason(.lastChance, caller: $0.currentPlayerUp))
+        
+        // No mermaid check as it can be handled in next player
+        
+        $0.setNextPlayerUp()
+        $0.set(phase: .waitingForDraw)
+    }
+    
     fileprivate static let completeRoundCommand: Self = .init {
-//        guard case let .endReason(_, caller) = $0.currentRound?.state else { return }
+        // Check for a winner
+        if $0.winner != nil {
+            $0.set(phase: .endGame)
+            return
+        }
+        
+        // No Winner so complete the round
         $0.set(roundState: .complete) // Complete round
         $0.addNewRound() // Add a new round
         $0.setNextPlayerUp() // Move to next player up

@@ -85,6 +85,12 @@ extension ScoreCalculator.CountScore {
 
         return colorScore
     }
+    
+    /// Highest-frequency color count in the player’s hand/effects
+    static let colorBonus: Self = .init { cards in
+        Dictionary(grouping: cards.map(\.color), by: { $0 })
+            .values.map(\.count).max() ?? 0
+    }
 }
 
 // MARK: - fileprivate Extensions
