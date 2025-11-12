@@ -102,6 +102,9 @@ struct RoundSimulationTests {
         #expect(testSubject.game.rounds.first?.state == .complete)
 
         // Validate scores
+        #expect(testSubject.game.rounds[0].points[.one] == 6)
+        #expect(testSubject.game.rounds[0].points[.two] == 8)
+
         #expect(testSubject.game.scores[.one] == 6)
         #expect(testSubject.game.scores[.two] == 8)
         #expect(testSubject.game.scores[.three] == nil)
@@ -112,8 +115,8 @@ struct RoundSimulationTests {
         #expect(testSubject.game.phase != .endGame)
     }
     
-    @Test("Success - Simulate round with player 2 calling 'last chance' to end round")
-    func successSimulateRoundWithPlayer2CallingLastChanceToEndRound() async throws {
+    @Test("Success - 2UP won last chance call round simulation")
+    func success2UPWonLastChanceCallRoundSimulation() async throws {
         // TODO: AI Implement this test
         // CONTEXT: If a player says LAST CHANCE, then all other players each take a final turn, reveal their cards and count their points.
         // - If BET WON by player: their score is higher or equal to that of their opponents.
@@ -125,11 +128,112 @@ struct RoundSimulationTests {
         // Use Deck.roundDeck for deterministic tests
         
         // GIVEN
-        
+        let (stream, continuation) = AsyncStream<GameEngine.Event>.makeStream()
+        let sendEvent: @Sendable (_ event: GameEngine.Event) -> Void = { [continuation] in continuation.yield($0) }
+        let dataProvider = GameEngine.DataProvider(
+            deck: { .roundDeck + .lastChanceBetWon }, // Set up deck so that 2UP will win
+            newGameID: { .mockGameID() },
+            saveGame: { _ in },
+            shuffleCards: { $0 },
+            streamOfGameEngineEvents: { [stream] in stream },
+            sendEvent: sendEvent
+        )
+        var testSubject = GameEngine(dataProvider: dataProvider)
+
         // WHEN
+        try testSubject.performAction(.system(.createGame(players: .two)))
+
+        // THEN - Set up game
+        #expect(testSubject.game.id == .mockGameID())
+        #expect(testSubject.game.deck.leftDiscardPile.first == .init(id: 0, kind: .duo(.crab), color: .lightBlue, location: .pile(.discardLeft)))
+        #expect(testSubject.game.deck.rightDiscardPile.first == .init(id: 1, kind: .collector(.shell), color: .lightGrey, location: .pile(.discardRight)))
+        #expect(testSubject.game.phase == .waitingForDraw)
+
+        // Simulate turns
+        try simulateRoundEndingWithPlayer2(&testSubject)
+        
+        // WHEN - Player calls stop
+        try testSubject.performAction(.user(.endRound(.lastChance)))
         
         // THEN
+        #expect(testSubject.game.currentRound?.state == .endReason(.lastChance, caller: .two))
+        #expect(testSubject.game.currentPlayerUp == .one)
+        #expect(testSubject.game.phase == .waitingForDraw)
+        
+        // WHEN - Player one has final turn
+        try player1Turn9_lastChanceWon(&testSubject)
+        
+        // THEN
+        #expect(testSubject.actionIsPlayable(.user(.endTurn)) == false)
+        #expect(testSubject.actionIsPlayable(.user(.completeRound)) == true)
+        #expect(testSubject.game.phase == .roundEnded(.lastChance))
+        
+        // WHEN - Player completes round
+        try testSubject.performAction(.user(.completeRound))
+        
+        // THEN
+        // Player 2 score is 8 + color bonus
+        #expect(testSubject.game.rounds[0].points[.one] == 2) // Only color bonus
+        #expect(testSubject.game.rounds[0].points[.two] == 13) // 8 + 5
+        #expect(testSubject.game.scores[.one] == 2) // Only color bonus
+        #expect(testSubject.game.scores[.two] == 13) // 8 + 5
+        // Player 1 score only score color bonus
     }
+    
+    @Test("Success - 2UP lost last chance call round simulation")
+    func success2UPLostLastChanceCallRoundSimulation() async throws {
+        // GIVEN
+        let (stream, continuation) = AsyncStream<GameEngine.Event>.makeStream()
+        let sendEvent: @Sendable (_ event: GameEngine.Event) -> Void = { [continuation] in continuation.yield($0) }
+        let dataProvider = GameEngine.DataProvider(
+            deck: { .roundDeck + .lastChanceBetLost }, // Set up the deck so that 2UP will lose.
+            newGameID: { .mockGameID() },
+            saveGame: { _ in },
+            shuffleCards: { $0 },
+            streamOfGameEngineEvents: { [stream] in stream },
+            sendEvent: sendEvent
+        )
+        var testSubject = GameEngine(dataProvider: dataProvider)
+
+        // WHEN
+        try testSubject.performAction(.system(.createGame(players: .two)))
+
+        // THEN - Set up game
+        #expect(testSubject.game.id == .mockGameID())
+        #expect(testSubject.game.deck.leftDiscardPile.first == .init(id: 0, kind: .duo(.crab), color: .lightBlue, location: .pile(.discardLeft)))
+        #expect(testSubject.game.deck.rightDiscardPile.first == .init(id: 1, kind: .collector(.shell), color: .lightGrey, location: .pile(.discardRight)))
+        #expect(testSubject.game.phase == .waitingForDraw)
+
+        // Simulate turns
+        try simulateRoundEndingWithPlayer2(&testSubject)
+        
+        // WHEN - Player calls stop
+        try testSubject.performAction(.user(.endRound(.lastChance)))
+        
+        // THEN
+        #expect(testSubject.game.currentRound?.state == .endReason(.lastChance, caller: .two))
+        #expect(testSubject.game.currentPlayerUp == .one)
+        #expect(testSubject.game.phase == .waitingForDraw)
+        
+        // WHEN - Player one has final turn
+        try player1Turn9_lastChanceLost(&testSubject)
+        
+        // THEN
+        #expect(testSubject.actionIsPlayable(.user(.endTurn)) == false)
+        #expect(testSubject.actionIsPlayable(.user(.completeRound)) == true)
+        #expect(testSubject.game.phase == .roundEnded(.lastChance))
+        
+        // WHEN - Player completes round
+        try testSubject.performAction(.user(.completeRound))
+        
+        // THEN
+        #expect(testSubject.game.rounds[0].points[.one] == 10) // Points in hand
+        #expect(testSubject.game.rounds[0].points[.two] == 5) // Color bonus only
+        #expect(testSubject.game.scores[.one] == 10) // Points in hand
+        #expect(testSubject.game.scores[.two] == 5) // Color bonus only
+    }
+    
+    // TODO: Implement test for the game over conditions when a player scores more than 40
 }
 
 extension RoundSimulationTests {
@@ -746,9 +850,85 @@ extension RoundSimulationTests {
         #expect(testSubject.game.deck.topCard(pile: .discardRight)?.id == 32) // ID of penguin
         #expect(testSubject.game.phase == .waitingForPlay)
     }
+    
+    private func player1Turn9_lastChanceWon(_ testSubject: inout GameEngine) throws {
+        // 1up
+        //
+        // Draw two cards
+
+        // WHEN - Draw two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 1up's hand.
+        #expect(
+            [
+                Card.init(id: 34, kind: .collector(.sailor), color: .orange, location: .playerHand(.one)),
+                Card.init(id: 35, kind: .multiplier(.sailor), color: .orange, location: .playerHand(.one))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .one).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+        // WHEN - Discard crab dark blue to left discard
+        try testSubject.performAction(.user(.discardToLeftPile(34))) // ID of sailor
+
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 34) // ID of sailor
+        #expect(testSubject.game.phase == .waitingForPlay)
+        // End turn
+
+        // WHEN - 1up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .roundEnded(.lastChance))
+        #expect(testSubject.game.currentPlayerUp == .two)
+    }
+    
+    private func player1Turn9_lastChanceLost(_ testSubject: inout GameEngine) throws {
+        // 1up
+        //
+        // Draw two cards
+
+        // WHEN - Draw two cards
+        try testSubject.performAction(.user(.drawPilePickUp))
+
+        // THEN - Check if the drawn cards are in 1up's hand.
+        #expect(
+            [
+                Card.init(id: 34, kind: .collector(.sailor), color: .orange, location: .playerHand(.one)),
+                Card.init(id: 35, kind: .collector(.octopus), color: .lightGreen, location: .playerHand(.one))
+            ].allSatisfy(testSubject.game.cardsInHand(ofPlayer: .one).contains(_:))
+        )
+        #expect(testSubject.game.phase == .waitingForDiscard)
+
+        // WHEN - Discard crab dark blue to left discard
+        try testSubject.performAction(.user(.discardToLeftPile(34))) // ID of sailor
+
+        // THEN -
+        #expect(testSubject.game.deck.topCard(pile: .discardLeft)?.id == 34) // ID of sailor
+        #expect(testSubject.game.phase == .waitingForPlay)
+        // End turn
+
+        // WHEN - 1up ends turn
+        try testSubject.performAction(.user(.endTurn))
+
+        // THEN - Play is now with player 2
+        #expect(testSubject.game.phase == .roundEnded(.lastChance))
+        #expect(testSubject.game.currentPlayerUp == .two)
+    }
 }
 
 extension Array where Element == Card {
+    fileprivate static let lastChanceBetWon: Self = [
+        .collector(.sailor, id: 34, color: .orange), // Sailor orange - 1up draw
+        .multiplier(.sailor, id: 35, color: .orange), // Multiplier Sailor orange - 1up draw
+    ]
+    
+    fileprivate static let lastChanceBetLost: Self = [
+        .collector(.sailor, id: 34, color: .orange), // Collector Sailor orange - 1up draw
+        .collector(.octopus, id: 35, color: .lightGreen), // Octopus - 1up draw
+    ]
+
     fileprivate static let roundDeck: Self = [
         .duo(.crab, id: 0, color: .lightBlue), // Crab light Blue -> Discard left
         .collector(.shell, id: 1, color: .lightGrey), // Shell Grey -> Discard right
@@ -782,7 +962,6 @@ extension Array where Element == Card {
         .collector(.shell, id: 29, color: .black), // 2up fish draw
         .collector(.shell, id: 30, color: .darkBlue), // Shell dark blue
         .duo(.crab, id: 31, color: .darkBlue), // Crab dark blue
-
         .collector(.penguin, id: 32, color: .purple), // Penguin purple - 2up draw
         .collector(.shell, id: 33, color: .yellow), // Shell yellow - 2up draw
     ]

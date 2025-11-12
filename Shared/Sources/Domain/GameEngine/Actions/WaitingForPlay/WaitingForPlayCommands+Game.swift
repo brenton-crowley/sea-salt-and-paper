@@ -159,35 +159,24 @@ extension Command where S == Game {
     }
 
     fileprivate static let endTurnNextPlayer: Self = .init {
-        // Need to check that we're not in last chance because if we are and next player called last chance, then it's the end of the round.
-        if
-            case let .endReason(.lastChance, caller) = $0.currentRound?.state,
-            caller == $0.currentPlayerUp {
-            // We've completed a final round so set state end turn last chance
-            
-            // TODO: Update implementation score counting
-            $0.set(roundPoints: ScoreCalculator.roundPointsForLastChance(cards: $0.deck.cards))
-            
-            // Set phase to turn ended so that user can complete the turn
-            if let _ = $0.winner { $0.set(phase: .endGame) } else { $0.set(phase: .roundEnded(.lastChance)) }
-
-            return
-        }
-
-        // move this logic out.
-
         // Run the system actions.
         // - Check mermaids
         guard !$0.currentPlayerHasFourMermaids else {
             $0.set(phase: .endGame)
             return // End game
         }
-
-        // Only change to next player so long as nextPlayerUp
-        // $0.currentPlayerUp.next(playersInGame: )
-        // -- Change to next player
-        $0.setNextPlayerUp()
-        $0.set(phase: .waitingForDraw)
+        
+        // Need to check that we're not in last chance because if we are and next player called last chance, then it's the end of the round.
+        if
+            case let .endReason(.lastChance, caller) = $0.currentRound?.state,
+            caller == $0.nextPlayerUp {
+            // We've completed a final round so set state end turn last chance
+            $0.setNextPlayerUp()
+            $0.set(phase: .roundEnded(.lastChance))
+        } else {
+            $0.setNextPlayerUp()
+            $0.set(phase: .waitingForDraw)
+        }
     }
 
     fileprivate static let endRoundStopCommand: Self = .init {
@@ -200,12 +189,12 @@ extension Command where S == Game {
     }
     
     fileprivate static let completeRoundCommand: Self = .init {
-        guard case let .endReason(reason, _) = $0.currentRound?.state else { return }
+        guard case let .endReason(reason, caller) = $0.currentRound?.state else { return }
         
         // Update the scores for the round.
         switch reason {
         case .stop: $0.set(roundPoints: ScoreCalculator.roundPointsForStop(cards: $0.deck.cards))
-        case .lastChance: $0.set(roundPoints: ScoreCalculator.roundPointsForLastChance(cards: $0.deck.cards))
+        case .lastChance: $0.set(roundPoints: ScoreCalculator.roundPointsForLastChance(cards: $0.deck.cards, caller: caller))
         }
         
         // Check for a winner
