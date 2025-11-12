@@ -200,6 +200,9 @@ extension Command where S == Game {
     }
     
     fileprivate static let completeRoundCommand: Self = .init {
+        // Complete the Round
+        $0.set(roundState: .complete) // Complete round
+        
         // Check for a winner
         if $0.winner != nil {
             $0.set(phase: .endGame)
@@ -207,7 +210,6 @@ extension Command where S == Game {
         }
         
         // No Winner so complete the round
-        $0.set(roundState: .complete) // Complete round
         $0.addNewRound() // Add a new round
         $0.setNextPlayerUp() // Move to next player up
         $0.set(phase: .waitingForDraw) // Set to waiting for draw
