@@ -13,8 +13,8 @@ extension Action where S == Game {
 
     static let endTurnNextPlayer: Self = .init(rule: .ruleToEndTurn, command: .endTurnNextPlayer)
     static let endRoundStop: Self = .init(rule: .ruleToEndRoundStop, command: .endRoundStopCommand)
-    static let completeRound: Self = .init(rule: .ruleToCompleteRound, command: .completeRoundCommand)
     static let endRoundLastChance: Self = .init(rule: .ruleToEndRoundLastChance, command: .endRoundLastChanceCommand)
+    static let completeRound: Self = .init(rule: .ruleToCompleteRound, command: .completeRoundCommand)
 }
 
 // MARK: - Game Validations
@@ -188,15 +188,18 @@ extension Command where S == Game {
         // Ask user to start new round.
     }
     
+    fileprivate static let endRoundLastChanceCommand: Self = .init {
+        // We only want to set a flag that last chance has been called.
+        // We'll calculate last chance in the next up turn.
+        $0.set(roundState: .endReason(.lastChance, caller: $0.currentPlayerUp))
+        
+        // No mermaid check as it can be handled in next player
+        
+        $0.setNextPlayerUp()
+        $0.set(phase: .waitingForDraw)
+    }
+    
     fileprivate static let completeRoundCommand: Self = .init {
-        guard case let .endReason(reason, caller) = $0.currentRound?.state else { return }
-        
-        // Update the scores for the round.
-        switch reason {
-        case .stop: $0.set(roundPoints: ScoreCalculator.roundPointsForStop(cards: $0.deck.cards))
-        case .lastChance: $0.set(roundPoints: ScoreCalculator.roundPointsForLastChance(cards: $0.deck.cards, caller: caller))
-        }
-        
         // Check for a winner
         if $0.winner != nil {
             $0.set(phase: .endGame)
@@ -208,17 +211,6 @@ extension Command where S == Game {
         $0.addNewRound() // Add a new round
         $0.setNextPlayerUp() // Move to next player up
         $0.set(phase: .waitingForDraw) // Set to waiting for draw
-    }
-    
-    fileprivate static let endRoundLastChanceCommand: Self = .init {
-        // We only want to set a flag that last chance has been called.
-        // We'll calculate last chance in the next up turn.
-        $0.set(roundState: .endReason(.lastChance, caller: $0.currentPlayerUp))
-        
-        // No mermaid check as it can be handled in next player
-        
-        $0.setNextPlayerUp()
-        $0.set(phase: .waitingForDraw)
     }
 }
 

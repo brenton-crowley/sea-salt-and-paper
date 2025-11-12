@@ -7,7 +7,7 @@ public struct Game: Sendable, Hashable, Identifiable {
 
     internal(set) public var players: [Player.ID: Player] = [:]
     internal(set) public var deck: Deck = .init()
-    internal(set) public var phase: Game.Phase = .waitingForStart
+    internal(set) public var phase: Game.Phase = .waitingForStart { didSet { handleDidSetPhase() } }
     internal(set) public var currentPlayerUp: Player.Up = .one
     internal(set) public var rounds: [Game.Round]
     
@@ -109,6 +109,17 @@ extension Game {
         case .two:
             players[.two] = Player(id: .two)
             players[.one] = Player(id: .one)
+        }
+    }
+    
+    private mutating func handleDidSetPhase() {
+        // Count scores when round ends
+        switch phase {
+        case .roundEnded(.stop): set(roundPoints: ScoreCalculator.roundPointsForStop(cards: deck.cards))
+        case .roundEnded(.lastChance):
+            guard case let .endReason(_, caller) = currentRound?.state else { return }
+            set(roundPoints: ScoreCalculator.roundPointsForLastChance(cards: deck.cards, caller: caller))
+        default: break
         }
     }
 }
