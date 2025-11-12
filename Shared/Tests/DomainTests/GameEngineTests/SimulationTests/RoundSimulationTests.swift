@@ -234,6 +234,63 @@ struct RoundSimulationTests {
     }
     
     // TODO: Implement test for the game over conditions when a player scores more than 40
+    @Test("Success - 2UP calls 'Stop' to end round and game.")
+    func successSimulateRoundWithPlayer2CallingStopToEndGame() async throws {
+        // GIVEN
+        let (stream, continuation) = AsyncStream<GameEngine.Event>.makeStream()
+        let sendEvent: @Sendable (_ event: GameEngine.Event) -> Void = { [continuation] in continuation.yield($0) }
+        let dataProvider = GameEngine.DataProvider(
+            deck: { .roundDeck },
+            newGameID: { .mockGameID() },
+            saveGame: { _ in },
+            shuffleCards: { $0 },
+            streamOfGameEngineEvents: { [stream] in stream },
+            sendEvent: sendEvent
+        )
+        var testSubject = GameEngine(dataProvider: dataProvider)
+
+        // WHEN
+        try testSubject.performAction(.system(.createGame(players: .two)))
+
+        // THEN - Set up game
+        #expect(testSubject.game.id == .mockGameID())
+        #expect(testSubject.game.deck.leftDiscardPile.first == .init(id: 0, kind: .duo(.crab), color: .lightBlue, location: .pile(.discardLeft)))
+        #expect(testSubject.game.deck.rightDiscardPile.first == .init(id: 1, kind: .collector(.shell), color: .lightGrey, location: .pile(.discardRight)))
+        #expect(testSubject.game.phase == .waitingForDraw)
+
+        // Pre-fill a single round with high scores
+        testSubject.game.set(roundPoints: [.one: 30, .two: 32])
+        testSubject.game.addNewRound()
+        
+        // Simulate turns
+        try simulateRoundEndingWithPlayer2(&testSubject)
+
+        // WHEN - Player calls stop
+        try testSubject.performAction(.user(.endRound(.stop)))
+        
+        // THEN
+        #expect(testSubject.game.phase == .roundEnded(.stop))
+        #expect(testSubject.game.currentRound?.state == .endReason(.stop, caller: Player.ID.two))
+        
+        // WHEN - Player completes round (Proceed)
+        try testSubject.performAction(.user(.completeRound))
+        
+        // THEN
+        #expect(testSubject.game.currentRound?.state == .complete)
+
+        // Validate scores for the round
+        #expect(testSubject.game.rounds[1].points[.one] == 6)
+        #expect(testSubject.game.rounds[1].points[.two] == 8)
+
+        #expect(testSubject.game.scores[.one] == 36)
+        #expect(testSubject.game.scores[.two] == 40)
+        #expect(testSubject.game.scores[.three] == nil)
+        #expect(testSubject.game.scores[.four] == nil)
+        
+        // 2UP is winner
+        #expect(testSubject.game.winner == .two)
+        #expect(testSubject.game.phase == .endGame)
+    }
 }
 
 extension RoundSimulationTests {
